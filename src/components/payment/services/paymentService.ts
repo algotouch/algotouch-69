@@ -1,8 +1,12 @@
 
-import { supabase } from '@/lib/supabase-client';
-import { TokenData } from '@/types/payment';
+import { supabase } from '@/integrations/supabase/client';
+import {
+  TokenData,
+  SubscriptionPlan,
+  RegistrationData
+} from '@/types/payment';
+import { User } from '@supabase/supabase-js';
 import { RegistrationResult } from '../hooks/types';
-import { toast } from 'sonner'; 
 
 // Import using a dynamic import to avoid circular dependencies
 const importErrorHandling = async () => {
@@ -14,7 +18,7 @@ export const handleExistingUserPayment = async (
   planId: string,
   tokenData: TokenData,
   operationType: number,
-  planDetails: any
+  planDetails: Record<string, SubscriptionPlan>
 ) => {
   const now = new Date();
   let trialEndsAt = null;
@@ -143,7 +147,7 @@ export const handleExistingUserPayment = async (
 };
 
 export const registerNewUser = async (
-  registrationData: any,
+  registrationData: RegistrationData,
   tokenData: TokenData
 ): Promise<RegistrationResult> => {
   try {
@@ -180,18 +184,20 @@ export const registerNewUser = async (
     sessionStorage.removeItem('registration_data');
     
     return { success: true, userId: data.userId };
-  } catch (error: any) {
+  } catch (error) {
     console.error("Registration error:", error);
-    
-    const registrationError = new Error(error.message || 'שגיאה בתהליך ההרשמה');
+
+    const registrationError = new Error(
+      (error as Error).message || 'שגיאה בתהליך ההרשמה'
+    );
     throw registrationError;
   }
 };
 
 export const initiateExternalPayment = async (
-  planId: string, 
-  user: any, 
-  registrationData: any
+  planId: string,
+  user: User | null,
+  registrationData: RegistrationData | null
 ) => {
   try {
     let operationType = 3; // Default: token creation only (for monthly with free trial)
@@ -335,7 +341,7 @@ export const generateDocument = async (
     if (error) throw error;
     
     return { success: true, data };
-  } catch (error: any) {
+  } catch (error) {
     console.error('Document generation error:', error);
     return { success: false, error: error.message };
   }
@@ -350,7 +356,7 @@ export const listUserDocuments = async (userId: string) => {
     if (error) throw error;
     
     return { success: true, documents: data?.documents || [] };
-  } catch (error: any) {
+  } catch (error) {
     console.error('Error listing documents:', error);
     return { success: false, error: error.message };
   }

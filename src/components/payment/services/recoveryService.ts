@@ -4,7 +4,7 @@ import { supabase } from '@/lib/supabase-client';
 // Send a recovery email to the user after a payment failure
 export const sendRecoveryEmail = async (
   email: string,
-  errorInfo: any,
+  errorInfo: unknown,
   sessionId?: string
 ): Promise<boolean> => {
   try {
@@ -54,7 +54,7 @@ export const savePaymentSession = async (sessionData: {
   userId?: string;
   email?: string;
   planId: string;
-  paymentDetails?: any;
+  paymentDetails?: Record<string, unknown>;
 }) => {
   try {
     const sessionId = crypto.randomUUID();
