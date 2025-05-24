@@ -36,7 +36,7 @@ const PaymentCardForm: React.FC<PaymentCardFormProps> = ({
           price={plan.price} 
           description={plan.description}
           hasTrial={planId === 'monthly'}
-          currency="$" 
+          currency="₪"
         />
         
         <div className="bg-card rounded-xl p-6 border border-border shadow-sm">

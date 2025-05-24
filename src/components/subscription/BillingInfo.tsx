@@ -11,7 +11,7 @@ interface BillingInfoProps {
 const BillingInfo: React.FC<BillingInfoProps> = ({ 
   nextBillingDate, 
   planPrice,
-  currency = '$'
+  currency = '₪'
 }) => {
   return (
     <>
