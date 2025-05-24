@@ -80,26 +80,40 @@ serve(async (req) => {
 
     console.log('User created successfully:', userData.user.id);
 
-    const trialEndsAt = new Date();
-    trialEndsAt.setMonth(trialEndsAt.getMonth() + 1); // 1 month trial
+    const isMonthlyPlan = registrationData.planId === 'monthly';
+    let trialEndsAt: Date | null = null;
+    if (isMonthlyPlan) {
+      trialEndsAt = new Date();
+      trialEndsAt.setMonth(trialEndsAt.getMonth() + 1); // 1 month trial
+    }
 
     // Determine payment method from either tokenData or registrationData.paymentToken
     const paymentMethod = tokenData || registrationData.paymentToken || null;
 
     // Create the subscription record
-      const { data: subscriptionData, error: subscriptionError } = await supabaseClient
-        .from('subscriptions')
-        .insert({
-          user_id: userData.user.id,
-          plan_type: registrationData.planId,
-          status: 'trial',
-          trial_ends_at: trialEndsAt.toISOString(),
-          payment_method: paymentMethod,
-          contract_signed: true,
-          contract_signed_at: new Date().toISOString()
-        })
-        .select('id')
-        .single();
+  const { data: subscriptionData, error: subscriptionError } = await supabaseClient
+    .from('subscriptions')
+    .insert({
+      user_id: userData.user.id,
+      plan_type: registrationData.planId,
+      status: 'trial',
+      trial_ends_at: trialEndsAt.toISOString(),
+      payment_method: paymentMethod,
+      contract_signed: true,
+      contract_signed_at: new Date().toISOString()
+    })
+    .select('id')
+    .single();
+
+  console.log('Subscription created successfully', subscriptionData.id);
+
+  await supabaseClient.from('payment_history').insert({
+    user_id: userData.user.id,
+    subscription_id: subscriptionData.id,
+    amount: 0,
+    status: 'trial_started',
+    payment_method: paymentMethod
+  });
 
     if (subscriptionError) {
       console.error('Subscription error:', subscriptionError);

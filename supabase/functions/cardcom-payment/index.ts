@@ -1,5 +1,6 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.14.0";
+import { getPlanAmount } from "../_shared/planAmounts.ts";
 
 // Configure CORS headers
 const corsHeaders = {
@@ -40,6 +41,12 @@ enum OperationType {
   TOKEN_ONLY = 3,         // Create token only (for future charges)
 }
 
+const OPERATION_MAP: Record<OperationType, string> = {
+  [OperationType.CHARGE_ONLY]: 'ChargeOnly',
+  [OperationType.CHARGE_AND_TOKEN]: 'ChargeAndCreateToken',
+  [OperationType.TOKEN_ONLY]: 'CreateTokenOnly'
+};
+
 // Create a payment session with CardCom API v11
 async function createPaymentSession(params: any) {
   const { 
@@ -61,6 +68,9 @@ async function createPaymentSession(params: any) {
   }
   
   try {
+    const operationString = OPERATION_MAP[operationType as OperationType] ||
+      'CreateTokenOnly';
+
     // Prepare the request payload for LowProfile Create
     const payload = {
       TerminalNumber: parseInt(API_CONFIG.TERMINAL),
@@ -70,7 +80,7 @@ async function createPaymentSession(params: any) {
       SuccessRedirectUrl: successUrl,
       FailedRedirectUrl: errorUrl,
       WebHookUrl: webHookUrl,
-      Operation: operationType.toString(),
+      Operation: operationString,
       Language: "he",
       ISOCoinId: 1, // ILS
       
@@ -91,10 +101,10 @@ async function createPaymentSession(params: any) {
       }
     };
 
-    console.log('Creating CardCom payment session:', { 
-      planId, 
-      amount, 
-      operationType,
+    console.log('Creating CardCom payment session:', {
+      planId,
+      amount,
+      operation: operationString,
       webhookConfigured: !!webHookUrl
     });
     
@@ -355,15 +365,8 @@ serve(async (req) => {
       }
 
       try {
-        // Determine payment amount based on plan with proper USD to NIS conversion
-        let amount = '0.00';
-        if (planId === 'monthly') {
-          amount = '375.00'; // 99 USD in NIS
-        } else if (planId === 'annual') {
-          amount = '3410.00'; // 899 USD in NIS
-        } else if (planId === 'vip') {
-          amount = '13270.00'; // 3499 USD in NIS
-        }
+        // Determine payment amount using shared plan data
+        const amount = getPlanAmount(planId);
 
         // Generate webhook URL using the current origin
         const origin = url.origin;
