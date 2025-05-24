@@ -40,6 +40,12 @@ enum OperationType {
   TOKEN_ONLY = 3,         // Create token only (for future charges)
 }
 
+const OPERATION_MAP: Record<OperationType, string> = {
+  [OperationType.CHARGE_ONLY]: 'ChargeOnly',
+  [OperationType.CHARGE_AND_TOKEN]: 'ChargeAndCreateToken',
+  [OperationType.TOKEN_ONLY]: 'CreateTokenOnly'
+};
+
 // Create a payment session with CardCom API v11
 async function createPaymentSession(params: any) {
   const { 
@@ -61,6 +67,9 @@ async function createPaymentSession(params: any) {
   }
   
   try {
+    const operationString = OPERATION_MAP[operationType as OperationType] ||
+      'CreateTokenOnly';
+
     // Prepare the request payload for LowProfile Create
     const payload = {
       TerminalNumber: parseInt(API_CONFIG.TERMINAL),
@@ -70,7 +79,7 @@ async function createPaymentSession(params: any) {
       SuccessRedirectUrl: successUrl,
       FailedRedirectUrl: errorUrl,
       WebHookUrl: webHookUrl,
-      Operation: operationType.toString(),
+      Operation: operationString,
       Language: "he",
       ISOCoinId: 1, // ILS
       
@@ -91,10 +100,10 @@ async function createPaymentSession(params: any) {
       }
     };
 
-    console.log('Creating CardCom payment session:', { 
-      planId, 
-      amount, 
-      operationType,
+    console.log('Creating CardCom payment session:', {
+      planId,
+      amount,
+      operation: operationString,
       webhookConfigured: !!webHookUrl
     });
     
