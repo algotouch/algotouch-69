@@ -1,5 +1,6 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.14.0";
+import { getPlanAmount } from "../_shared/planAmounts.ts";
 
 // Configure CORS headers
 const corsHeaders = {
@@ -364,15 +365,8 @@ serve(async (req) => {
       }
 
       try {
-        // Determine payment amount based on plan with proper USD to NIS conversion
-        let amount = '0.00';
-        if (planId === 'monthly') {
-          amount = '375.00'; // 99 USD in NIS
-        } else if (planId === 'annual') {
-          amount = '3410.00'; // 899 USD in NIS
-        } else if (planId === 'vip') {
-          amount = '13270.00'; // 3499 USD in NIS
-        }
+        // Determine payment amount using shared plan data
+        const amount = getPlanAmount(planId);
 
         // Generate webhook URL using the current origin
         const origin = url.origin;
