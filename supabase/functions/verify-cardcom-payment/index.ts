@@ -17,6 +17,7 @@ interface CardcomResponse {
   TranzactionId?: number | string;
   ReturnValue?: string;
   Operation?: string;
+  OperationResponse?: string;
   TokenInfo?: {
     Token: string;
     TokenExDate: string;
@@ -133,11 +134,17 @@ serve(async (req) => {
     if (!webhookError && existingWebhook?.processed && existingWebhook?.payload) {
       // We already processed this payment via webhook
       const webhookData = existingWebhook.payload as unknown as CardcomResponse;
-      
-      if (webhookData.ResponseCode === 0) {
+
+      const webhookApproved =
+        webhookData.ResponseCode === 0 &&
+        (webhookData.TranzactionInfo?.ResponseCode === 0 ||
+          webhookData.OperationResponse === '0') &&
+        !!webhookData.TranzactionId;
+
+      if (webhookApproved) {
         await logPaymentEvent(
-          supabaseClient, 
-          'info', 
+          supabaseClient,
+          'info',
           `Payment already verified via webhook: ${existingWebhook.id}`,
           'verify-cardcom-payment',
           { 
@@ -183,7 +190,7 @@ serve(async (req) => {
           }
         );
       } else {
-        throw new Error(`Payment failed with response code: ${webhookData.ResponseCode}, ${webhookData.Description || ''}`);
+        throw new Error(`Payment failed or declined: ${webhookData.Description || webhookData.ResponseCode}`);
       }
     }
 
@@ -228,8 +235,24 @@ serve(async (req) => {
       cardcomData.TranzactionId?.toString()
     );
     
-    if (cardcomData.ResponseCode !== 0) {
-      throw new Error(`Payment verification failed: ${cardcomData.Description || 'Unknown error'}`);
+    const apiApproved =
+      cardcomData.ResponseCode === 0 &&
+      (cardcomData.TranzactionInfo?.ResponseCode === 0 ||
+        cardcomData.OperationResponse === '0') &&
+      !!cardcomData.TranzactionId;
+
+    if (!apiApproved) {
+      await logPaymentEvent(
+        supabaseClient,
+        'error',
+        'CardCom transaction not approved',
+        'verify-cardcom-payment',
+        { lowProfileId, cardcomData },
+        cardcomData.ReturnValue
+      );
+      throw new Error(
+        `Transaction not approved: ${cardcomData.Description || cardcomData.ResponseCode}`
+      );
     }
 
     // Save the response to payment_webhooks table for future reference
