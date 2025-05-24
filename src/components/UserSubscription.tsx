@@ -342,7 +342,7 @@ const SubscriptionDetails = ({
                   <BillingInfo 
                     nextBillingDate={details.nextBillingDate} 
                     planPrice={details.planPrice}
-                    currency="$"
+                    currency="₪"
                   />
                   
                   <PaymentMethodInfo 

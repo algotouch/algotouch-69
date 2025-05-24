@@ -59,7 +59,7 @@ export const handleExistingUserPayment = async (
           user_id: userId,
           subscription_id: userId,
           amount: price,
-          currency: 'USD',
+          currency: 'ILS',
           status: 'completed',
           payment_method: {
             ...tokenData,
@@ -126,7 +126,7 @@ export const handleExistingUserPayment = async (
           user_id: userId,
           subscription_id: userId,
           amount: 0,
-          currency: 'USD',
+          currency: 'ILS',
           status: 'trial_started',
           payment_method: tokenData
         });
