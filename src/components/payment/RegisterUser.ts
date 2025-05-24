@@ -1,29 +1,23 @@
 
 import { supabase } from '@/integrations/supabase/client';
-import { toast } from 'sonner';
-import { TokenData } from './utils/paymentHelpers';
 import { Json } from '@/integrations/supabase/types';
+import {
+  TokenData,
+  RegistrationData,
+  ContractSignatureData
+} from '@/types/payment';
 
 interface RegisterUserParams {
-  registrationData: any;
+  registrationData: RegistrationData;
   tokenData: TokenData;
-  contractDetails?: {
-    contractHtml?: string;
-    signature?: string;
-    agreedToTerms?: boolean;
-    agreedToPrivacy?: boolean;
-    contractVersion?: string;
-    browserInfo?: any;
-  } | null;
+  contractDetails?: ContractSignatureData | null;
 }
 
-interface RegisterResult {
-  success: boolean;
-  userId?: string;
-  error?: any;
-}
+import { RegistrationResult } from './hooks/types';
 
-export const registerUser = async ({ registrationData, tokenData, contractDetails }: RegisterUserParams): Promise<RegisterResult> => {
+export const registerUser = async (
+  { registrationData, tokenData, contractDetails }: RegisterUserParams
+): Promise<RegistrationResult> => {
   try {
     // Create the user account
     const { data: userData, error: userError } = await supabase.auth.signUp({
@@ -149,7 +143,7 @@ export const registerUser = async ({ registrationData, tokenData, contractDetail
     }
     
     return { success: true, userId: userData.user.id };
-  } catch (error: any) {
+  } catch (error) {
     console.error('Registration error:', error);
     return { success: false, error };
   }
