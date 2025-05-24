@@ -87,33 +87,35 @@ serve(async (req) => {
     const paymentMethod = tokenData || registrationData.paymentToken || null;
 
     // Create the subscription record
-    const { error: subscriptionError } = await supabaseClient
-      .from('subscriptions')
-      .insert({
-        user_id: userData.user.id,
-        plan_type: registrationData.planId,
-        status: 'trial',
-        trial_ends_at: trialEndsAt.toISOString(),
-        payment_method: paymentMethod,
-        contract_signed: true,
-        contract_signed_at: new Date().toISOString()
-      });
+      const { data: subscriptionData, error: subscriptionError } = await supabaseClient
+        .from('subscriptions')
+        .insert({
+          user_id: userData.user.id,
+          plan_type: registrationData.planId,
+          status: 'trial',
+          trial_ends_at: trialEndsAt.toISOString(),
+          payment_method: paymentMethod,
+          contract_signed: true,
+          contract_signed_at: new Date().toISOString()
+        })
+        .select('id')
+        .single();
 
     if (subscriptionError) {
       console.error('Subscription error:', subscriptionError);
       throw subscriptionError;
     }
 
-    console.log('Subscription created successfully');
+    console.log('Subscription created successfully', subscriptionData.id);
 
-    // Create payment history record
-    await supabaseClient.from('payment_history').insert({
-      user_id: userData.user.id,
-      subscription_id: userData.user.id,
-      amount: 0,
-      status: 'trial_started',
-      payment_method: paymentMethod
-    });
+      // Create payment history record using the actual subscription id
+      await supabaseClient.from('payment_history').insert({
+        user_id: userData.user.id,
+        subscription_id: subscriptionData.id,
+        amount: 0,
+        status: 'trial_started',
+        payment_method: paymentMethod
+      });
 
     // Update profile information
     const { error: profileError } = await supabaseClient
