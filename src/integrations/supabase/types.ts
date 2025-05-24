@@ -324,6 +324,117 @@ export type Database = {
         }
         Relationships: []
       }
+      payment_history: {
+        Row: {
+          id: string
+          user_id: string
+          subscription_id: string
+          amount: number
+          status: string
+          currency: string
+          payment_method: Json | null
+          payment_date: string | null
+          created_at: string | null
+        }
+        Insert: {
+          id?: string
+          user_id: string
+          subscription_id: string
+          amount: number
+          status: string
+          currency?: string
+          payment_method?: Json | null
+          payment_date?: string | null
+          created_at?: string | null
+        }
+        Update: {
+          id?: string
+          user_id?: string
+          subscription_id?: string
+          amount?: number
+          status?: string
+          currency?: string
+          payment_method?: Json | null
+          payment_date?: string | null
+          created_at?: string | null
+        }
+        Relationships: []
+      }
+      payment_tokens: {
+        Row: {
+          id: string
+          user_id: string
+          token: string
+          token_expiry: string
+          card_brand: string | null
+          card_last_four: string | null
+          is_active: boolean | null
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          user_id: string
+          token: string
+          token_expiry: string
+          card_brand?: string | null
+          card_last_four?: string | null
+          is_active?: boolean | null
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          user_id?: string
+          token?: string
+          token_expiry?: string
+          card_brand?: string | null
+          card_last_four?: string | null
+          is_active?: boolean | null
+          created_at?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      documents: {
+        Row: {
+          id: string
+          user_id: string
+          payment_id: string | null
+          document_type: string
+          document_number: string
+          document_url: string
+          document_date: string
+          created_at: string
+          updated_at: string
+          metadata: Json | null
+        }
+        Insert: {
+          id?: string
+          user_id: string
+          payment_id?: string | null
+          document_type: string
+          document_number: string
+          document_url: string
+          document_date?: string
+          created_at?: string
+          updated_at?: string
+          metadata?: Json | null
+        }
+        Update: {
+          id?: string
+          user_id?: string
+          payment_id?: string | null
+          document_type?: string
+          document_number?: string
+          document_url?: string
+          document_date?: string
+          created_at?: string
+          updated_at?: string
+          metadata?: Json | null
+        }
+        Relationships: []
+      }
       payment_errors: {
         Row: {
           created_at: string
