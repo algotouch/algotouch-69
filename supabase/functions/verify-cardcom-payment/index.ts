@@ -196,7 +196,7 @@ serve(async (req) => {
       { lowProfileId }
     );
 
-    const cardcomResponse = await fetch('https://secure.cardcom.solutions/api/v1/LowProfile/GetLpResult', {
+    const cardcomResponse = await fetch('https://secure.cardcom.solutions/api/v11/LowProfile/GetLpResult', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json'
