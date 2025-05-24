@@ -80,8 +80,12 @@ serve(async (req) => {
 
     console.log('User created successfully:', userData.user.id);
 
-    const trialEndsAt = new Date();
-    trialEndsAt.setMonth(trialEndsAt.getMonth() + 1); // 1 month trial
+    const isMonthlyPlan = registrationData.planId === 'monthly';
+    let trialEndsAt: Date | null = null;
+    if (isMonthlyPlan) {
+      trialEndsAt = new Date();
+      trialEndsAt.setMonth(trialEndsAt.getMonth() + 1); // 1 month trial
+    }
 
     // Determine payment method from either tokenData or registrationData.paymentToken
     const paymentMethod = tokenData || registrationData.paymentToken || null;
@@ -92,8 +96,8 @@ serve(async (req) => {
       .insert({
         user_id: userData.user.id,
         plan_type: registrationData.planId,
-        status: 'trial',
-        trial_ends_at: trialEndsAt.toISOString(),
+        status: isMonthlyPlan ? 'trial' : 'active',
+        trial_ends_at: trialEndsAt ? trialEndsAt.toISOString() : null,
         payment_method: paymentMethod,
         contract_signed: true,
         contract_signed_at: new Date().toISOString()

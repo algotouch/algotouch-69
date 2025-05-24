@@ -42,7 +42,7 @@ const SubscriptionPlans: React.FC<SubscriptionPlansProps> = ({
       </div>
       
       <div className="text-center text-sm text-muted-foreground mt-6">
-        <p>* כל התכניות (חודשי ושנתי) כוללות חודש ניסיון חינם. ניתן לבטל בכל עת ללא התחייבות.</p>
+        <p>* המסלול החודשי כולל חודש ניסיון חינם. ניתן לבטל בכל עת ללא התחייבות.</p>
       </div>
     </div>
   );

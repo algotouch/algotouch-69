@@ -100,8 +100,12 @@ export const registerUser = async ({
     // Add a delay to ensure the user record is propagated
     await new Promise(resolve => setTimeout(resolve, 1000));
     
-    const trialEndsAt = new Date();
-    trialEndsAt.setMonth(trialEndsAt.getMonth() + 1); // 1 month trial
+    const isMonthlyPlan = registrationData.planId === 'monthly';
+    let trialEndsAt: Date | null = null;
+    if (isMonthlyPlan) {
+      trialEndsAt = new Date();
+      trialEndsAt.setMonth(trialEndsAt.getMonth() + 1); // 1 month trial
+    }
     
     // Create the subscription record - Convert TokenData to a regular object for storage
     const paymentMethodData = {
@@ -118,8 +122,8 @@ export const registerUser = async ({
       .insert({
         user_id: userData.user.id,
         plan_type: registrationData.planId,
-        status: 'trial',
-        trial_ends_at: trialEndsAt.toISOString(),
+        status: isMonthlyPlan ? 'trial' : 'active',
+        trial_ends_at: trialEndsAt ? trialEndsAt.toISOString() : null,
         payment_method: paymentMethodData, // Using the simplified object
         contract_signed: true,
         contract_signed_at: new Date().toISOString()
