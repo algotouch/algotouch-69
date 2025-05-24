@@ -53,8 +53,18 @@ export const usePaymentUrlParams = (
     
     // Listen for payment messages from the iframe
     const handlePaymentMessage = (event: MessageEvent) => {
-      // For security, we should validate the origin
-      // but in this case we're communicating with our own page
+      const allowedOrigins = [
+        'https://secure.cardcom.solutions',
+        window.location.origin
+      ];
+
+      if (!allowedOrigins.includes(event.origin)) {
+        console.warn(
+          `Ignored message from unauthorized origin: ${event.origin}`
+        );
+        return;
+      }
+
       console.log('Received message:', event.data);
       
       if (event.data?.type === 'cardcom-paid') {

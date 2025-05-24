@@ -32,17 +32,27 @@ const PaymentIframe: React.FC<PaymentIframeProps> = ({
     return () => window.removeEventListener('resize', handleResize);
   }, []);
 
+
   // Listen for messages from the iframe
   useEffect(() => {
     const handleMessage = (event: MessageEvent) => {
-      // For security, we should validate the origin, but for now we're using '*' in postMessage
+      const allowedOrigins = [
+        'https://secure.cardcom.solutions',
+        window.location.origin
+      ];
+
+      if (!allowedOrigins.includes(event.origin)) {
+        console.warn(`Ignored message from unauthorized origin: ${event.origin}`);
+        return;
+      }
+
       console.log('Received message from iframe:', event.data);
-      
+
       if (event.data?.type === 'cardcom-paid') {
         // Payment successful
         console.log('Payment successful:', event.data.details);
         toast.success('התשלום התקבל בהצלחה!');
-        
+
         if (onSuccess) {
           onSuccess(event.data.details);
         }
@@ -50,7 +60,7 @@ const PaymentIframe: React.FC<PaymentIframeProps> = ({
         // Payment failed
         console.error('Payment error:', event.data.message);
         toast.error('שגיאה בתהליך התשלום: ' + (event.data.message || 'אנא נסה שנית'));
-        
+
         if (onError) {
           onError(new Error(event.data.message || 'Payment failed'));
         }
@@ -60,6 +70,7 @@ const PaymentIframe: React.FC<PaymentIframeProps> = ({
     window.addEventListener('message', handleMessage);
     return () => window.removeEventListener('message', handleMessage);
   }, [onSuccess, onError]);
+
 
   if (!paymentUrl) return null;
 
