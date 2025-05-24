@@ -43,12 +43,34 @@ serve(async (req) => {
       );
     }
 
+    // Convert numeric operation to string enum expected by CardCom
+    let operation = requestData.operation;
+    if (typeof operation === 'number') {
+      switch (operation) {
+        case 1:
+          operation = 'ChargeOnly';
+          break;
+        case 2:
+          operation = 'ChargeAndCreateToken';
+          break;
+        case 3:
+          operation = 'CreateTokenOnly';
+          break;
+      }
+    } else if (operation === '1') {
+      operation = 'ChargeOnly';
+    } else if (operation === '2') {
+      operation = 'ChargeAndCreateToken';
+    } else if (operation === '3') {
+      operation = 'CreateTokenOnly';
+    }
+
     // Build request body for Cardcom API
     const cardcomRequestBody = {
       TerminalNumber: requestData.terminalNumber,
       ApiName: requestData.apiName,
       // Include the operation (e.g. ChargeAndCreateToken) for recurring payments
-      Operation: requestData.operation || "ChargeAndCreateToken",
+      Operation: operation || "ChargeAndCreateToken",
       Amount: requestData.amount,
       SuccessRedirectUrl: requestData.successUrl,
       FailedRedirectUrl: requestData.failedUrl,
