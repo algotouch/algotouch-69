@@ -210,16 +210,16 @@ export const SubscriptionProvider: React.FC<SubscriptionProviderProps> = ({ chil
       
       // Check if we have a valid recurring payment token
       if (data.status === 'active' && !data.token) {
-        console.log('Active subscription without token, checking recurring_payments');
+        console.log('Active subscription without token, checking payment_tokens');
         
         try {
-          // Try to find a token in recurring_payments
+          // Try to find a token in payment_tokens
           // FIX: Use ISO datetime comparison instead of just date comparison to properly handle timezones
           const { data: recurringPayments, error: recurringError } = await supabase
-            .from('recurring_payments')
-            .select('token, token_expiry, is_valid')
+            .from('payment_tokens')
+            .select('token, token_expiry, is_active')
             .eq('user_id', userId)
-            .eq('is_valid', true)
+            .eq('is_active', true)
             .gte('token_expiry', new Date().toISOString().split('T')[0]) // Using date part only is fine since token_expiry is a date without time
             .order('created_at', { ascending: false })
             .limit(1);
@@ -236,7 +236,7 @@ export const SubscriptionProvider: React.FC<SubscriptionProviderProps> = ({ chil
             // Additional validation to ensure token is not expired
             // This uses date-fns to properly compare dates
             if (isAfter(tokenExpiryDate, today)) {
-              console.log('Found valid token in recurring_payments, syncing to subscription');
+              console.log('Found valid token in payment_tokens, syncing to subscription');
               
               // Update subscription with token
               const { error: updateError } = await supabase

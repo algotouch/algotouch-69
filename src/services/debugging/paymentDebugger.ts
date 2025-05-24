@@ -271,17 +271,20 @@ export class PaymentDebugger {
           return false;
         }
         
+        await supabase
+          .from('payment_tokens')
+          .update({ is_active: false, updated_at: new Date().toISOString() })
+          .eq('user_id', userId);
+
         const { error: tokenError } = await supabase
-          .from('recurring_payments')
+          .from('payment_tokens')
           .insert({
             user_id: userId,
             token: paymentData.token_info.token,
             token_expiry: paymentData.token_info.expiry,
-            token_approval_number: paymentData.token_info.approval || '', // Provide empty string if null
-            last_4_digits: paymentData.card_info?.last4 || null,
-            card_type: paymentData.card_info?.card_type || null,
-            status: 'active',
-            is_valid: true,
+            card_last_four: paymentData.card_info?.last4 || null,
+            card_brand: paymentData.card_info?.card_type || null,
+            is_active: true,
             created_at: new Date().toISOString(),
             updated_at: new Date().toISOString()
           });

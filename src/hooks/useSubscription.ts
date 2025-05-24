@@ -127,30 +127,30 @@ export const useSubscription = (): UseSubscriptionReturn => {
         }
       }
       
-      // Also check recurring_payments table for this user
+      // Also check payment_tokens table for this user
       const { data: recurringPayments, error: recurringError } = await supabase
-        .from('recurring_payments')
-        .select('token, is_valid, token_expiry')
+        .from('payment_tokens')
+        .select('token, is_active, token_expiry')
         .eq('user_id', user.id)
-        .eq('is_valid', true)
+        .eq('is_active', true)
         .gte('token_expiry', new Date().toISOString().split('T')[0])
         .limit(1);
         
       if (recurringError) {
-        console.error('Error checking recurring payments:', recurringError);
+        console.error('Error checking payment tokens:', recurringError);
       } else {
         if (recurringPayments && recurringPayments.length === 0 && subscription) {
-          console.log('User has subscription but no valid recurring payment token');
+          console.log('User has subscription but no valid payment token');
           // This indicates a potential inconsistency that might need fixing
           return true;
         }
         
-        // Check if there's a mismatch between subscription and recurring_payments
+        // Check if there's a mismatch between subscription and payment_tokens
         if (recurringPayments?.length > 0 && subscription) {
           const recurringToken = recurringPayments[0].token;
           
           if (subscription.token !== recurringToken) {
-            console.log('Token mismatch between subscription and recurring_payments');
+            console.log('Token mismatch between subscription and payment_tokens');
             // There's an inconsistency that needs to be fixed
             return true;
           }

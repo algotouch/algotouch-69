@@ -342,7 +342,7 @@ async function processUserPayment(supabase: any, userId: string, payload: any) {
     throw new Error(`Failed to update subscription: ${error.message}`);
   }
 
-  // If we have token info, store it in recurring_payments table
+  // If we have token info, store it in payment_tokens table
   if (tokenInfo && tokenInfo.Token) {
     console.log(`Storing token for user: ${userId}, token: ${tokenInfo.Token}`);
     
@@ -352,18 +352,24 @@ async function processUserPayment(supabase: any, userId: string, payload: any) {
         throw new Error('Missing TokenExDate in token information');
       }
       
-      // Save the token to recurring_payments
+      // Deactivate existing tokens for this user
+      await supabase
+        .from('payment_tokens')
+        .update({ is_active: false, updated_at: new Date().toISOString() })
+        .eq('user_id', userId);
+
+      // Save the new token to payment_tokens
       const { error: tokenError } = await supabase
-        .from('recurring_payments')
+        .from('payment_tokens')
         .insert({
           user_id: userId,
           token: tokenInfo.Token,
           token_expiry: parseCardcomDateString(tokenInfo.TokenExDate),
-          token_approval_number: tokenInfo.TokenApprovalNumber || '', // Ensure it's never null
-          last_4_digits: transactionInfo?.Last4CardDigits || null,
-          card_type: transactionInfo?.CardInfo || null,
-          status: 'active',
-          is_valid: true
+          card_brand: transactionInfo?.CardInfo || null,
+          card_last_four: transactionInfo?.Last4CardDigits || null,
+          is_active: true,
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString()
         });
         
       if (tokenError) {

@@ -93,7 +93,7 @@ serve(async (req) => {
 
     // Step 3: Check for payment tokens
     const { data: paymentTokens, error: tokenError } = await supabase
-      .from('recurring_payments')
+      .from('payment_tokens')
       .select('*')
       .eq('user_id', targetUserId)
       .order('created_at', { ascending: false })
@@ -115,15 +115,14 @@ serve(async (req) => {
     if (!tokenError && paymentTokens && paymentTokens.length > 0) {
       const token = paymentTokens[0];
       const tokenExpiry = new Date(token.token_expiry);
-      hasValidToken = token.is_valid && tokenExpiry > new Date();
+      hasValidToken = token.is_active && tokenExpiry > new Date();
 
-      if (!token.is_valid && forceRefresh) {
+      if (!token.is_active && forceRefresh) {
         // Attempt to repair the token if it's marked as invalid but we're forcing refresh
         const { error: tokenUpdateError } = await supabase
-          .from('recurring_payments')
-          .update({ 
-            is_valid: true,
-            status: 'active',
+          .from('payment_tokens')
+          .update({
+            is_active: true,
             updated_at: new Date().toISOString()
           })
           .eq('id', token.id);
@@ -200,8 +199,8 @@ serve(async (req) => {
             contract_signed_at: new Date().toISOString(),
             payment_method: {
               token: paymentTokens[0].token,
-              last4Digits: paymentTokens[0].last_4_digits,
-              cardType: paymentTokens[0].card_type
+              last4Digits: paymentTokens[0].card_last_four,
+              cardType: paymentTokens[0].card_brand
             }
           });
 
@@ -230,16 +229,21 @@ serve(async (req) => {
           const tokenExpiry = new Date();
           tokenExpiry.setFullYear(tokenExpiry.getFullYear() + 5); // 5 years validity
 
+          // Deactivate any existing tokens for the user
+          await supabase
+            .from('payment_tokens')
+            .update({ is_active: false, updated_at: new Date().toISOString() })
+            .eq('user_id', targetUserId);
+
           const { error: createTokenError } = await supabase
-            .from('recurring_payments')
+            .from('payment_tokens')
             .insert({
               user_id: targetUserId,
               token: payment.token,
               token_expiry: tokenExpiry.toISOString(),
-              last_4_digits: payment.payment_data?.last4Digits || "0000",
-              card_type: payment.payment_data?.cardType || "unknown",
-              status: 'active',
-              is_valid: true,
+              card_last_four: payment.payment_data?.last4Digits || '0000',
+              card_brand: payment.payment_data?.cardType || 'unknown',
+              is_active: true,
               created_at: new Date().toISOString(),
               updated_at: new Date().toISOString()
             });
