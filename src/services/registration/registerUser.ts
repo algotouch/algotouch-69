@@ -138,16 +138,21 @@ export const registerUser = async ({
         const expiryDate = new Date();
         expiryDate.setFullYear(expiryDate.getFullYear() + 5); // 5 years validity for card token
         
-        // Insert token data into recurring_payments table
-        await supabase.from('recurring_payments').insert({
+        // Mark existing tokens inactive and save the new token
+        await supabase
+          .from('payment_tokens')
+          .update({ is_active: false, updated_at: new Date().toISOString() })
+          .eq('user_id', userData.user.id);
+
+        await supabase.from('payment_tokens').insert({
           user_id: userData.user.id,
           token: tokenData.token.toString(), // Ensure it's a string
           token_expiry: expiryDate.toISOString(),
-          last_4_digits: tokenData.lastFourDigits,
-          card_type: tokenData.cardType?.toString() || 'unknown',
-          status: 'active',
-          token_approval_number: tokenData.approvalNumber?.toString(),
-          is_valid: true
+          card_last_four: tokenData.lastFourDigits,
+          card_brand: tokenData.cardType?.toString() || 'unknown',
+          is_active: true,
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString()
         });
           
         console.log('Payment token stored successfully');

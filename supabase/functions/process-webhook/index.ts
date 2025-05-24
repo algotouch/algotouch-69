@@ -273,18 +273,21 @@ serve(async (req) => {
               console.error('Error creating subscription:', subError);
             }
             
-            // Save token
+            // Deactivate existing tokens before saving a new one
+            await supabaseClient
+              .from('payment_tokens')
+              .update({ is_active: false, updated_at: new Date().toISOString() })
+              .eq('user_id', effectiveUserId);
+
             const { error: tokenError } = await supabaseClient
-              .from('recurring_payments')
-              .upsert({
+              .from('payment_tokens')
+              .insert({
                 user_id: effectiveUserId,
                 token: tokenInfo.Token,
                 token_expiry: parseCardcomDateString(tokenInfo.TokenExDate),
-                token_approval_number: tokenInfo.TokenApprovalNumber,
-                last_4_digits: transactionInfo?.Last4CardDigits || null,
-                card_type: transactionInfo?.CardInfo || null,
-                status: 'active',
-                is_valid: true,
+                card_brand: transactionInfo?.CardInfo || null,
+                card_last_four: transactionInfo?.Last4CardDigits || null,
+                is_active: true,
                 created_at: new Date().toISOString(),
                 updated_at: new Date().toISOString()
               });

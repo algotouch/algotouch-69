@@ -83,7 +83,7 @@ export const SubscriptionManager: React.FC<SubscriptionManagerProps> = ({
       
       // Check for payment tokens
       const { data: tokenData, error: tokenError } = await supabase
-        .from('recurring_payments')
+        .from('payment_tokens')
         .select('*')
         .eq('user_id', userId)
         .order('created_at', { ascending: false })
@@ -93,10 +93,10 @@ export const SubscriptionManager: React.FC<SubscriptionManagerProps> = ({
         setDiagnosticInfo(prev => ({
           ...prev,
           hasToken: true,
-          tokenStatus: tokenData[0].status,
-          tokenValid: tokenData[0].is_valid,
+          tokenStatus: tokenData[0].is_active ? 'active' : 'inactive',
+          tokenValid: tokenData[0].is_active,
           tokenExpiry: tokenData[0].token_expiry,
-          last4Digits: tokenData[0].last_4_digits
+          last4Digits: tokenData[0].card_last_four
         }));
       } else {
         setDiagnosticInfo(prev => ({
