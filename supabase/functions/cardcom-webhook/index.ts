@@ -51,15 +51,16 @@ serve(async (req) => {
     
     // Process the webhook based on the payload data
     // CardCom webhook contains information about the transaction
-    const { 
-      ResponseCode, 
-      LowProfileId, 
-      TranzactionId, 
+    const {
+      ResponseCode,
+      LowProfileId,
+      TranzactionId,
       ReturnValue,
       TokenInfo,
       TranzactionInfo,
       UIValues,
-      Operation 
+      Operation,
+      OperationResponse
     } = payload;
     
     // Log the webhook data details
@@ -81,7 +82,8 @@ serve(async (req) => {
     };
 
     // Only process successful transactions
-    if (ResponseCode === 0) {
+    const isSuccess = ResponseCode === 0 || OperationResponse === '0';
+    if (isSuccess) {
       try {
         // Validate token information if this is a token operation
         if ((Operation === "ChargeAndCreateToken" || Operation === "CreateTokenOnly") && !TokenInfo?.Token) {
@@ -104,9 +106,20 @@ serve(async (req) => {
           } else if (ReturnValue.match(/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i)) {
             // This is a UUID - process as user payment
             await processUserPayment(supabaseClient, ReturnValue, payload);
-            processingResult = { 
-              success: true, 
-              message: 'Processed user payment', 
+            try {
+              await supabaseClient.functions.invoke('process-payment-data', {
+                body: {
+                  paymentData: payload,
+                  userId: ReturnValue,
+                  source: 'cardcom-webhook'
+                }
+              });
+            } catch (invokeError) {
+              console.error('Error invoking process-payment-data:', invokeError);
+            }
+            processingResult = {
+              success: true,
+              message: 'Processed user payment',
               details: { userId: ReturnValue }
             };
           } else {
@@ -126,9 +139,20 @@ serve(async (req) => {
                 
                 // Process as a regular user payment
                 await processUserPayment(supabaseClient, userId, payload);
-                processingResult = { 
-                  success: true, 
-                  message: 'Processed user payment via email lookup', 
+                try {
+                  await supabaseClient.functions.invoke('process-payment-data', {
+                    body: {
+                      paymentData: payload,
+                      userId,
+                      source: 'cardcom-webhook'
+                    }
+                  });
+                } catch (invokeError) {
+                  console.error('Error invoking process-payment-data:', invokeError);
+                }
+                processingResult = {
+                  success: true,
+                  message: 'Processed user payment via email lookup',
                   details: { userId, email }
                 };
               } else {
@@ -151,9 +175,20 @@ serve(async (req) => {
                   
                   // Process as a regular user payment
                   await processUserPayment(supabaseClient, userId, payload);
-                  processingResult = { 
-                    success: true, 
-                    message: 'Processed user payment via direct auth.users lookup', 
+                  try {
+                    await supabaseClient.functions.invoke('process-payment-data', {
+                      body: {
+                        paymentData: payload,
+                        userId,
+                        source: 'cardcom-webhook'
+                      }
+                    });
+                  } catch (invokeError) {
+                    console.error('Error invoking process-payment-data:', invokeError);
+                  }
+                  processingResult = {
+                    success: true,
+                    message: 'Processed user payment via direct auth.users lookup',
                     details: { userId, email }
                   };
                 } else {
@@ -191,9 +226,20 @@ serve(async (req) => {
               
               // Process as a regular user payment
               await processUserPayment(supabaseClient, userId, payload);
-              processingResult = { 
-                success: true, 
-                message: 'Processed user payment via email lookup', 
+              try {
+                await supabaseClient.functions.invoke('process-payment-data', {
+                  body: {
+                    paymentData: payload,
+                    userId,
+                    source: 'cardcom-webhook'
+                  }
+                });
+              } catch (invokeError) {
+                console.error('Error invoking process-payment-data:', invokeError);
+              }
+              processingResult = {
+                success: true,
+                message: 'Processed user payment via email lookup',
                 details: { userId, email }
               };
             } else {
@@ -216,9 +262,20 @@ serve(async (req) => {
                 
                 // Process as a regular user payment
                 await processUserPayment(supabaseClient, userId, payload);
-                processingResult = { 
-                  success: true, 
-                  message: 'Processed user payment via direct auth.users lookup', 
+                try {
+                  await supabaseClient.functions.invoke('process-payment-data', {
+                    body: {
+                      paymentData: payload,
+                      userId,
+                      source: 'cardcom-webhook'
+                    }
+                  });
+                } catch (invokeError) {
+                  console.error('Error invoking process-payment-data:', invokeError);
+                }
+                processingResult = {
+                  success: true,
+                  message: 'Processed user payment via direct auth.users lookup',
                   details: { userId, email }
                 };
               } else {
@@ -252,7 +309,7 @@ serve(async (req) => {
       processingResult = {
         success: false,
         message: `Transaction failed with code ${ResponseCode}`,
-        details: { ResponseCode, Description: payload.Description }
+        details: { ResponseCode, OperationResponse, Description: payload.Description }
       };
     }
 
@@ -429,27 +486,46 @@ async function processRegistrationPayment(supabase: any, regId: string, payload:
   
   // Mark the payment as verified in the registration data
   try {
+    const { data: existingReg } = await supabase
+      .from('temp_registration_data')
+      .select('registration_data')
+      .eq('id', actualId)
+      .single();
+
+    const updateData: Record<string, unknown> = {
+      payment_verified: true,
+      payment_details: {
+        transaction_id: payload.TranzactionId,
+        low_profile_id: payload.LowProfileId,
+        amount: payload.Amount,
+        response_code: payload.ResponseCode,
+        card_info: payload.TranzactionInfo ? {
+          last4: payload.TranzactionInfo.Last4CardDigits,
+          expiry: `${payload.TranzactionInfo.CardMonth}/${payload.TranzactionInfo.CardYear}`
+        } : null,
+        token_info: payload.TokenInfo ? {
+          token: payload.TokenInfo.Token,
+          expiry: payload.TokenInfo.TokenExDate,
+          approval: payload.TokenInfo.TokenApprovalNumber
+        } : null
+      },
+      updated_at: new Date().toISOString()
+    };
+
+    if (existingReg?.registration_data && payload.TokenInfo?.Token) {
+      updateData.registration_data = {
+        ...existingReg.registration_data,
+        paymentToken: {
+          token: payload.TokenInfo.Token,
+          expiry: payload.TokenInfo.TokenExDate,
+          last4Digits: payload.TranzactionInfo?.Last4CardDigits || ''
+        }
+      };
+    }
+
     const { error } = await supabase
       .from('temp_registration_data')
-      .update({ 
-        payment_verified: true,
-        payment_details: {
-          transaction_id: payload.TranzactionId,
-          low_profile_id: payload.LowProfileId,
-          amount: payload.Amount,
-          response_code: payload.ResponseCode,
-          card_info: payload.TranzactionInfo ? {
-            last4: payload.TranzactionInfo.Last4CardDigits,
-            expiry: `${payload.TranzactionInfo.CardMonth}/${payload.TranzactionInfo.CardYear}`
-          } : null,
-          token_info: payload.TokenInfo ? {
-            token: payload.TokenInfo.Token,
-            expiry: payload.TokenInfo.TokenExDate,
-            approval: payload.TokenInfo.TokenApprovalNumber
-          } : null
-        },
-        updated_at: new Date().toISOString()
-      })
+      .update(updateData)
       .eq('id', actualId);
   
     if (error) {
@@ -468,28 +544,42 @@ async function processRegistrationPayment(supabase: any, regId: string, payload:
         const matchedRegId = regData[0].id;
         console.log(`Found matching registration ID: ${matchedRegId}`);
         
-        // Update the found registration
+        const regDataEntry = regData[0];
+
+        const updateRegData: Record<string, unknown> = {
+          payment_verified: true,
+          payment_details: {
+            transaction_id: payload.TranzactionId,
+            low_profile_id: payload.LowProfileId,
+            amount: payload.Amount,
+            response_code: payload.ResponseCode,
+            card_info: payload.TranzactionInfo ? {
+              last4: payload.TranzactionInfo.Last4CardDigits,
+              expiry: `${payload.TranzactionInfo.CardMonth}/${payload.TranzactionInfo.CardYear}`
+            } : null,
+            token_info: payload.TokenInfo ? {
+              token: payload.TokenInfo.Token,
+              expiry: payload.TokenInfo.TokenExDate,
+              approval: payload.TokenInfo.TokenApprovalNumber
+            } : null
+          },
+          updated_at: new Date().toISOString()
+        };
+
+        if (regDataEntry.registration_data && payload.TokenInfo?.Token) {
+          updateRegData.registration_data = {
+            ...regDataEntry.registration_data,
+            paymentToken: {
+              token: payload.TokenInfo.Token,
+              expiry: payload.TokenInfo.TokenExDate,
+              last4Digits: payload.TranzactionInfo?.Last4CardDigits || ''
+            }
+          };
+        }
+
         const { error: updateError } = await supabase
           .from('temp_registration_data')
-          .update({ 
-            payment_verified: true,
-            payment_details: {
-              transaction_id: payload.TranzactionId,
-              low_profile_id: payload.LowProfileId,
-              amount: payload.Amount,
-              response_code: payload.ResponseCode,
-              card_info: payload.TranzactionInfo ? {
-                last4: payload.TranzactionInfo.Last4CardDigits,
-                expiry: `${payload.TranzactionInfo.CardMonth}/${payload.TranzactionInfo.CardYear}`
-              } : null,
-              token_info: payload.TokenInfo ? {
-                token: payload.TokenInfo.Token,
-                expiry: payload.TokenInfo.TokenExDate,
-                approval: payload.TokenInfo.TokenApprovalNumber
-              } : null
-            },
-            updated_at: new Date().toISOString()
-          })
+          .update(updateRegData)
           .eq('id', matchedRegId);
           
         if (updateError) {
