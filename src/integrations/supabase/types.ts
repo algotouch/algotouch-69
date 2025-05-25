@@ -1,3 +1,4 @@
+// Updated schema types after 20250412_add_indexes_and_policies.sql migration
 export type Json =
   | string
   | number
