@@ -64,9 +64,11 @@ const CardcomIframeRedirect: React.FC<CardcomIframeRedirectProps> = ({
         } else {
           throw new Error('לא התקבל קישור תקין ממערכת הסליקה');
         }
-      } catch (err: any) {
+      } catch (err: unknown) {
+        const errorMessage =
+          err instanceof Error ? err.message : String(err);
         console.error('Error creating iframe redirect:', err);
-        setError(err.message || 'אירעה שגיאה ביצירת עמוד התשלום');
+        setError(errorMessage);
         toast.error('שגיאה בהתחברות למערכת הסליקה');
       } finally {
         setIsLoading(false);
