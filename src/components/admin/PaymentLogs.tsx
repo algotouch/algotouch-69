@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/lib/supabase-client';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -8,7 +8,13 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { PaymentDebugger } from '@/services/debugging/paymentDebugger';
 import { toast } from 'sonner';
-import { PaymentLog } from '@/types/payment-logs';
+import { PaymentLog, PaymentLogDB } from '@/types/payment-logs';
+import { Json } from '@/integrations/supabase/types';
+
+interface ErrorPattern {
+  message: string;
+  count: number;
+}
 
 export default function PaymentLogs() {
   const [recentLogs, setRecentLogs] = useState<PaymentLog[]>([]);
@@ -18,16 +24,16 @@ export default function PaymentLogs() {
   const [searchTerm, setSearchTerm] = useState('');
   const [transactionId, setTransactionId] = useState('');
   const [transactionFlow, setTransactionFlow] = useState<PaymentLog[]>([]);
-  const [errorPatterns, setErrorPatterns] = useState<any[]>([]);
+  const [errorPatterns, setErrorPatterns] = useState<ErrorPattern[]>([]);
 
   // Fetch logs on component mount
   useEffect(() => {
     fetchLogs();
     analyzeErrors();
-  }, []);
+  }, [fetchLogs]);
 
   // Fetch recent logs from the database
-  const fetchLogs = async () => {
+  const fetchLogs = useCallback(async () => {
     setIsLoading(true);
     
     try {
@@ -69,10 +75,10 @@ export default function PaymentLogs() {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, []);
 
   // Map database log to UI log format
-  const mapDbLogToUiLog = (dbLog: any): PaymentLog => {
+  const mapDbLogToUiLog = (dbLog: PaymentLogDB): PaymentLog => {
     const paymentData = dbLog.payment_data || {};
     
     return {
@@ -161,7 +167,7 @@ export default function PaymentLogs() {
   };
 
   // Helper function to safely extract error details from payment data
-  const getErrorDetails = (paymentData: any) => {
+  const getErrorDetails = (paymentData: Json | null) => {
     if (!paymentData) return '—';
     
     if (typeof paymentData === 'object' && paymentData !== null) {
@@ -179,7 +185,7 @@ export default function PaymentLogs() {
   };
   
   // Helper function to safely extract amount from payment data
-  const getPaymentAmount = (paymentData: any) => {
+  const getPaymentAmount = (paymentData: Json | null) => {
     if (!paymentData) return '—';
     
     if (typeof paymentData === 'object' && paymentData !== null && 'amount' in paymentData) {
