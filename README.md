@@ -62,10 +62,12 @@ This project is built with .
 
 ## Required Environment Variables
 
-Supabase Edge Functions rely on several environment variables. Ensure these are set before deploying:
+Copy `.env.example` to `.env` and fill in the appropriate values. Supabase Edge Functions rely on several environment variables. Ensure these are set before deploying:
 
 - `SUPABASE_URL` – your Supabase project URL
 - `SUPABASE_ANON_KEY` – anonymous key for public calls
+- `VITE_SUPABASE_URL` – Supabase URL used by the frontend
+- `VITE_SUPABASE_ANON_KEY` – anonymous key consumed in the browser
 - `SUPABASE_SERVICE_ROLE_KEY` – service role key for privileged operations
 - `CARDCOM_TERMINAL` – CardCom terminal number
 - `CARDCOM_USERNAME` – CardCom API username
