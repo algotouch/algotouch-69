@@ -1,5 +1,5 @@
 
-import { createContext, useContext, useMemo } from 'react';
+import { createContext, useContext } from 'react'
 
 type Direction = 'ltr' | 'rtl';
 
@@ -8,7 +8,7 @@ interface DirectionContextValue {
 }
 
 // Create context with a default value to avoid null checks
-const DirectionContext = createContext<DirectionContextValue>({ dir: 'rtl' });
+const DirectionContext = createContext<DirectionContextValue>({ dir: 'rtl' })
 
 export const useDirection = () => useContext(DirectionContext);
 
@@ -17,15 +17,11 @@ interface DirectionProviderProps {
   children: React.ReactNode;
 }
 
-export const DirectionProvider: React.FC<DirectionProviderProps> = ({
+export const DirectionProvider = ({
   dir = 'rtl', // Default to RTL based on your app's Hebrew language
   children,
-}) => {
-  const value = useMemo(() => ({ dir }), [dir]);
-  
-  return (
-    <DirectionContext.Provider value={value}>
-      {children}
-    </DirectionContext.Provider>
-  );
-};
+}: DirectionProviderProps) => (
+  <DirectionContext.Provider value={{ dir }}>
+    {children}
+  </DirectionContext.Provider>
+)
