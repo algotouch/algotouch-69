@@ -5,6 +5,9 @@
 
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.4.0";
+import { envCheck } from "../_shared/envCheck.ts";
+
+envCheck(["SUPABASE_URL", "SUPABASE_SERVICE_ROLE_KEY"]);
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",

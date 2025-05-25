@@ -1,5 +1,8 @@
 
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { envCheck } from "../_shared/envCheck.ts";
+
+envCheck(["CARDCOM_TERMINAL", "CARDCOM_USERNAME", "CARDCOM_API_PASSWORD"]);
 
 // Configure CORS headers
 const corsHeaders = {

@@ -2,6 +2,9 @@
 // Follow Deno's HTTP server implementation
 import { corsHeaders } from '../_shared/cors.ts';
 import { DOMParser } from "https://deno.land/x/deno_dom@v0.1.38/deno-dom-wasm.ts";
+import { envCheck } from "../_shared/envCheck.ts";
+
+envCheck([]);
 
 // Define the news item interface
 interface NewsItem {

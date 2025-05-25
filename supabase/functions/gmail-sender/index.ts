@@ -1,5 +1,8 @@
 
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { envCheck } from "../_shared/envCheck.ts";
+
+envCheck(["GMAIL_CLIENT_ID", "GMAIL_CLIENT_SECRET", "GMAIL_REFRESH_TOKEN"]);
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",

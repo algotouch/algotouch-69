@@ -1,6 +1,9 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.14.0";
 import { getPlanAmount } from "../_shared/planAmounts.ts";
+import { envCheck } from "../_shared/envCheck.ts";
+
+envCheck(["SUPABASE_URL", "SUPABASE_ANON_KEY", "CARDCOM_TERMINAL", "CARDCOM_USERNAME", "CARDCOM_API_PASSWORD"]);
 
 // Configure CORS headers
 const corsHeaders = {

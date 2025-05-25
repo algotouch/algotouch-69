@@ -1,6 +1,9 @@
 
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { SmtpClient } from "https://deno.land/x/smtp@v0.7.0/mod.ts";
+import { envCheck } from "../_shared/envCheck.ts";
+
+envCheck(["SMTP_HOST", "SMTP_PORT", "SMTP_USER", "SMTP_PASS"]);
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
