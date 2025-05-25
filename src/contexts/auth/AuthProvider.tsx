@@ -5,6 +5,27 @@ import { AuthContext } from './AuthContext';
 import { useSecureAuth } from '@/hooks/useSecureAuth';
 import { RegistrationData as AuthRegistrationData } from './types';
 import { supabase } from '@/lib/supabase-client';
+import type { Session } from '@supabase/supabase-js';
+
+export async function validateSession(session: Session | null): Promise<boolean> {
+  if (!session) return false;
+
+  try {
+    const { data, error } = await supabase.functions.invoke('validate-session');
+    if (error) {
+      if ((error as { status?: number }).status === 401) {
+        return false;
+      }
+      console.error('Session validation error:', error);
+      return true;
+    }
+
+    return Boolean(data?.valid);
+  } catch (error) {
+    console.error('Session validation exception:', error);
+    return true;
+  }
+}
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const auth = useSecureAuth();
@@ -67,23 +88,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setPendingSubscription(false);
   };
   
-  // Validate session with the server
-  const validateSession = async () => {
-    if (!auth.session) return false;
-
-    try {
-      const { data, error } = await supabase.functions.invoke('validate-session');
-      if (error) {
-        console.error('Session validation error:', error);
-        return false;
-      }
-
-      return Boolean(data?.valid);
-    } catch (error) {
-      console.error('Session validation exception:', error);
-      return false;
-    }
-  };
+  // Validate session with the server using the auth session
+  const validateSessionWrapper = async () => validateSession(auth.session);
   
   // Add error handling for auth initialization
   useEffect(() => {
@@ -110,8 +116,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   useEffect(() => {
     if (!auth.initialized || !auth.session) return;
 
-    validateSession().then((valid) => {
-      if (!valid) {
+    validateSessionWrapper().then((valid) => {
+      if (valid === false) {
         auth.signOut();
         clearRegistrationData();
       }
@@ -148,7 +154,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       setRegistrationData: updateRegistrationData,
       clearRegistrationData,
       setPendingSubscription,
-      validateSession
+      validateSession: validateSessionWrapper
     }}>
       {children}
     </AuthContext.Provider>
