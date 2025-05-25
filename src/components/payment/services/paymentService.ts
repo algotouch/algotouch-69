@@ -21,8 +21,8 @@ export const handleExistingUserPayment = async (
   planDetails: Record<string, SubscriptionPlan>
 ) => {
   const now = new Date();
-  let trialEndsAt = null;
-  let periodEndsAt = null;
+  let trialEndsAt: Date | null = null;
+  let periodEndsAt: Date | null = null;
   
   if (planId === 'monthly') {
     trialEndsAt = new Date(now);
@@ -131,7 +131,7 @@ export const handleExistingUserPayment = async (
           payment_method: tokenData
         });
     }
-  } catch (error) {
+  } catch (error: unknown) {
     // Use dynamic import to avoid circular dependency
     const { handlePaymentError } = await importErrorHandling();
     await handlePaymentError(error, userId, undefined, undefined, {
@@ -163,7 +163,8 @@ export const registerNewUser = async (
     });
     
     if (error) {
-      throw new Error(error.message);
+      const message = (error as Error).message;
+      throw new Error(message);
     }
     
     if (!data?.success) {
@@ -184,7 +185,7 @@ export const registerNewUser = async (
     sessionStorage.removeItem('registration_data');
     
     return { success: true, userId: data.userId };
-  } catch (error) {
+  } catch (error: unknown) {
     console.error("Registration error:", error);
 
     const registrationError = new Error(
@@ -229,12 +230,13 @@ export const initiateExternalPayment = async (
       errorRedirectUrl: `${window.location.origin}/subscription?step=3&error=true&plan=${planId}&session=${paymentSessionId}`
     };
 
-    const { data, error } = await supabase.functions.invoke('cardcom-payment/create-payment', {
+      const { data, error } = await supabase.functions.invoke('cardcom-payment/create-payment', {
       body: payload
     });
 
     if (error) {
-      throw new Error(error.message);
+      const message = (error as Error).message;
+      throw new Error(message);
     }
 
     if (!data?.url) {
@@ -259,7 +261,7 @@ export const initiateExternalPayment = async (
       ...data,
       sessionId: paymentSessionId
     };
-  } catch (error) {
+  } catch (error: unknown) {
     // Use dynamic import to avoid circular dependency
     const { handlePaymentError } = await importErrorHandling();
     await handlePaymentError(error, user?.id, user?.email, undefined, {
@@ -341,9 +343,10 @@ export const generateDocument = async (
     if (error) throw error;
     
     return { success: true, data };
-  } catch (error) {
+  } catch (error: unknown) {
     console.error('Document generation error:', error);
-    return { success: false, error: error.message };
+    const message = error instanceof Error ? error.message : String(error);
+    return { success: false, error: message };
   }
 };
 
@@ -356,9 +359,10 @@ export const listUserDocuments = async (userId: string) => {
     if (error) throw error;
     
     return { success: true, documents: data?.documents || [] };
-  } catch (error) {
+  } catch (error: unknown) {
     console.error('Error listing documents:', error);
-    return { success: false, error: error.message };
+    const message = error instanceof Error ? error.message : String(error);
+    return { success: false, error: message };
   }
 };
 
@@ -371,9 +375,10 @@ export const getPaymentSystemHealth = async () => {
     if (error) throw error;
     
     return { success: true, data };
-  } catch (error) {
+  } catch (error: unknown) {
     console.error('Error checking payment system health:', error);
-    return { success: false, error: error.message };
+    const message = error instanceof Error ? error.message : String(error);
+    return { success: false, error: message };
   }
 };
 
@@ -386,14 +391,15 @@ export const retryFailedPayment = async (paymentId: string, userId: string) => {
     if (error) throw error;
     
     return { success: true, data };
-  } catch (error) {
+  } catch (error: unknown) {
     // Use dynamic import to avoid circular dependency
     const { handlePaymentError } = await importErrorHandling();
     await handlePaymentError(error, userId, undefined, undefined, {
       paymentDetails: { paymentId }
     });
     
-    return { success: false, error: error.message };
+    const message = error instanceof Error ? error.message : String(error);
+    return { success: false, error: message };
   }
 };
 
@@ -424,9 +430,10 @@ export const checkForExpiringCards = async (userId: string) => {
     }
     
     return { isExpiring: false };
-  } catch (error) {
+  } catch (error: unknown) {
     console.error('Error checking for expiring cards:', error);
-    return { isExpiring: false, error: error.message };
+    const message = error instanceof Error ? error.message : String(error);
+    return { isExpiring: false, error: message };
   }
 };
 
@@ -450,13 +457,14 @@ export const addAlternativePaymentMethod = async (userId: string, tokenData: Tok
     if (error) throw error;
     
     return { success: true, tokenId: data.id };
-  } catch (error) {
+  } catch (error: unknown) {
     // Use dynamic import to avoid circular dependency
     const { handlePaymentError } = await importErrorHandling();
     await handlePaymentError(error, userId, undefined, undefined, {
       paymentDetails: { action: 'add-alternative-payment' }
     });
     
-    return { success: false, error: error.message };
+    const message = error instanceof Error ? error.message : String(error);
+    return { success: false, error: message };
   }
 };
