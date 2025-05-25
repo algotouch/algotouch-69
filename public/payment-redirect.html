@@ -91,7 +91,7 @@
         // If we have the lowProfileId, try to verify it server-side
         if (lowProfileId) {
           try {
-            const response = await fetch(`https://ndhakvhrrkczgylcmyoc.supabase.co/functions/v1/verify-cardcom-payment`, {
+            const response = await fetch(`${VITE_SUPABASE_URL}/functions/v1/verify-cardcom-payment`, {
               method: 'POST',
               headers: {
                 'Content-Type': 'application/json',

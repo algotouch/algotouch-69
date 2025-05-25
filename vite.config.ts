@@ -1,8 +1,25 @@
 
 import { defineConfig } from "vite";
+import fs from 'fs';
 import react from "@vitejs/plugin-react-swc";
 import path from "path";
+import { Plugin } from 'vite';
 import { componentTagger } from "lovable-tagger";
+
+function injectSupabaseUrl(): Plugin {
+  return {
+    name: 'inject-supabase-url',
+    apply: 'build',
+    closeBundle() {
+      const file = path.resolve(__dirname, 'dist/payment-redirect.html');
+      if (!fs.existsSync(file)) return;
+      const supabaseUrl = process.env.VITE_SUPABASE_URL || '';
+      const content = fs.readFileSync(file, 'utf8');
+      const replaced = content.replace(/\$\{VITE_SUPABASE_URL\}/g, supabaseUrl);
+      fs.writeFileSync(file, replaced);
+    }
+  };
+}
 
 // https://vitejs.dev/config/
 export default defineConfig(({ mode }) => ({
@@ -17,6 +34,7 @@ export default defineConfig(({ mode }) => ({
     react(),
     mode === 'development' &&
     componentTagger(),
+    injectSupabaseUrl(),
   ].filter(Boolean),
   resolve: {
     alias: {
