@@ -44,6 +44,25 @@ interface SubscriptionContextType {
   planType: string | null;
 }
 
+/**
+ * Fetches the subscription record for a user. Extracted for easier testing.
+ */
+export const fetchSubscriptionRecord = async (
+  userId: string
+): Promise<SubscriptionRecord | null> => {
+  const { data, error } = await supabase
+    .from('subscriptions')
+    .select('*')
+    .eq('user_id', userId)
+    .maybeSingle();
+
+  if (error) {
+    throw new Error(error.message);
+  }
+
+  return data as SubscriptionRecord | null;
+};
+
 const SubscriptionContext = createContext<SubscriptionContextType | undefined>(undefined);
 
 export const useSubscriptionContext = () => {
@@ -184,19 +203,10 @@ export const SubscriptionProvider: React.FC<SubscriptionProviderProps> = ({ chil
   const checkUserSubscription = async (userId: string) => {
     try {
       setIsCheckingSubscription(true);
-      
-      // Use maybeSingle to avoid errors if no subscription exists
-      const { data, error } = await supabase
-        .from('subscriptions')
-        .select('*')
-        .eq('user_id', userId)
-        .maybeSingle();
-        
-      if (error) {
-        console.error('Error checking subscription:', error);
-        throw error;
-      }
-      
+      setError(null);
+
+      const data = await fetchSubscriptionRecord(userId);
+
       if (!data) {
         // No subscription found
         setSubscription(null);
@@ -267,7 +277,7 @@ export const SubscriptionProvider: React.FC<SubscriptionProviderProps> = ({ chil
       
     } catch (error: any) {
       console.error('Error checking subscription:', error);
-      setError('שגיאה בבדיקת פרטי המנוי');
+      setError(error.message || 'שגיאה בבדיקת פרטי המנוי');
       
       if (retryCount >= 3) {
         toast.error('שגיאה בבדיקת פרטי המנוי');

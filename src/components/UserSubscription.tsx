@@ -30,7 +30,7 @@ interface WebhookCheckResult {
 const UserSubscription = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
-  const { hasActiveSubscription } = useSubscriptionContext(); // Use the computed property
+  const { hasActiveSubscription, error: subscriptionError, refreshSubscription: contextRefresh } = useSubscriptionContext();
   const { 
     subscription, 
     loading, 
@@ -166,6 +166,26 @@ const UserSubscription = () => {
       }
     }
   };
+
+  // If subscription context encountered an error, show retry UI
+  if (subscriptionError) {
+    return (
+      <SubscriptionCard
+        title="שגיאה בבדיקת פרטי המנוי"
+        description="לא ניתן למשוך את נתוני המנוי"
+      >
+        <div className="p-6">
+          <Alert variant="destructive" className="mb-4">
+            <AlertDescription>{subscriptionError}</AlertDescription>
+          </Alert>
+          <Button onClick={() => contextRefresh().catch(console.error)} className="flex items-center gap-2">
+            <RefreshCw className="h-4 w-4" />
+            נסה שוב
+          </Button>
+        </div>
+      </SubscriptionCard>
+    );
+  }
 
   // Special state for when we've tried a few times and still can't load data
   if (maxRetriesReached || (checkError && retryCount >= 3)) {
