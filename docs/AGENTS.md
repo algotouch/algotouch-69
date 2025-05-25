@@ -11,7 +11,7 @@ Project guides, standards, and deep-dives in `/docs`.
 - Update docs when flows, architecture, or standards change
 - Use clear Markdown: headings, lists, code blocks
 - Document decisions, rationales, gotchas
-- New docs: create descriptive filenames (e.g. `PERFORMANCE.md`, `REACT_PROFILING.md`)
+ - New docs: create descriptive filenames (e.g. `PERFORMANCE.md`, `REACT_PROFILING.md`, `GLOBAL_ERROR_HANDLING.md`)
 - Cross-link AGENTS.md, CODE_STANDARDS.md, etc., where helpful
 
 ---

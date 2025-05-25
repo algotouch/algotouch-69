@@ -6,6 +6,7 @@ import { AuthProvider } from '@/contexts/auth';
 import { DirectionProvider } from '@/contexts/direction/DirectionProvider';
 import { StockDataProvider } from '@/contexts/stock/StockDataContext';
 import ProtectedRoute from '@/components/ProtectedRoute';
+import ErrorBoundary from '@/components/errors/ErrorBoundary';
 
 // Eagerly loaded routes for critical paths
 import Auth from '@/pages/Auth';
@@ -94,7 +95,8 @@ function App() {
     <BrowserRouter>
       <DirectionProvider dir="rtl">
         <Suspense fallback={<LoadingPage />}>
-          <Routes>
+          <ErrorBoundary>
+            <Routes>
             {/* Auth Error Route */}
             <Route path="/auth-error" element={<AuthLoadError />} />
             
@@ -144,6 +146,7 @@ function App() {
               <Route path="*" element={<NotFound />} />
             </Route>
           </Routes>
+        </ErrorBoundary>
         </Suspense>
         <Toaster richColors position="top-center" dir="rtl" />
       </DirectionProvider>
