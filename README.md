@@ -36,6 +36,17 @@ npm i
 npm run dev
 ```
 
+### Setup script
+
+Instead of running each step manually, you can use the helper script:
+
+```sh
+./scripts/setup.sh
+```
+
+This installs Node via `nvm` when required, installs project dependencies,
+sets up Playwright, and finally runs linting and the production build.
+
 **Edit a file directly in GitHub**
 
 - Navigate to the desired file(s).
