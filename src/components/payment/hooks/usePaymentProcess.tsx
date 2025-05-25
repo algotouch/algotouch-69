@@ -6,13 +6,14 @@ import { toast } from 'sonner';
 import { TokenData } from '@/types/payment';
 import { getSubscriptionPlans } from '../utils/paymentHelpers';
 import { useRegistrationData } from './useRegistrationData';
-import { 
-  handleExistingUserPayment, 
+import {
+  handleExistingUserPayment,
   registerNewUser,
   initiateExternalPayment
 } from '../services/paymentService';
 import { UsePaymentProcessProps, PaymentError } from './types';
 import { usePaymentErrorHandling } from './usePaymentErrorHandling';
+import { supabase } from '@/lib/supabase-client';
 
 export const usePaymentProcess = ({ planId, onPaymentComplete }: UsePaymentProcessProps) => {
   const navigate = useNavigate();
@@ -71,42 +72,53 @@ export const usePaymentProcess = ({ planId, onPaymentComplete }: UsePaymentProce
       setPaymentError(null);
       
       if (user) {
+        // Persist token server-side for security
+        await supabase.functions.invoke('process-payment-data', {
+          body: {
+            paymentData: {
+              Operation: 'CreateTokenOnly',
+              TokenInfo: {
+                Token: tokenData.token,
+                TokenExDate: `${tokenData.expiryYear}${tokenData.expiryMonth}01`
+              },
+              TranzactionInfo: {
+                Last4CardDigits: tokenData.lastFourDigits,
+                CardMonth: Number(tokenData.expiryMonth),
+                CardYear: Number(tokenData.expiryYear),
+                CardName: tokenData.cardholderName,
+                Amount: plan.price
+              },
+              TranzactionId: `manual_${Date.now()}`,
+              LowProfileId: `manual_${Date.now()}`
+            },
+            userId: user.id,
+            source: 'client-payment-process'
+          }
+        });
+
         await handleExistingUserPayment(user.id, planId, tokenData, operationTypeValue, planDetails);
       } else if (registrationData) {
         const updatedData = {
           ...registrationData,
-          paymentToken: {
-            token: tokenData.token || tokenData.lastFourDigits,
-            expiry: `${tokenData.expiryMonth}/${tokenData.expiryYear}`,
-            last4Digits: tokenData.lastFourDigits,
-            cardholderName: tokenData.cardholderName
-          },
           planId
         };
-        
-        sessionStorage.setItem('registration_data', JSON.stringify(updatedData));
+
         updateRegistrationData(updatedData);
-        
+
         if (updatedData.email && updatedData.password) {
           await registerNewUser(updatedData, tokenData);
         }
       } else {
         const tempRegId = `temp_reg_${Date.now()}_${Math.random().toString(36).substring(2, 11)}`;
         localStorage.setItem('temp_registration_id', tempRegId);
-        
+
         const minimalRegData = {
           planId,
-          paymentToken: {
-            token: tokenData.token || tokenData.lastFourDigits,
-            expiry: `${tokenData.expiryMonth}/${tokenData.expiryYear}`,
-            last4Digits: tokenData.lastFourDigits,
-            cardholderName: tokenData.cardholderName
-          },
           registrationTime: new Date().toISOString()
         };
-        
+
         sessionStorage.setItem('registration_data', JSON.stringify(minimalRegData));
-        
+
         toast.success('התשלום התקבל בהצלחה! נא להשלים את תהליך ההרשמה.');
       }
       

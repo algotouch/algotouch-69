@@ -3,6 +3,7 @@ import { useState, useEffect } from 'react';
 import { useAuth } from '@/contexts/auth';
 import { toast } from 'sonner';
 import { RegistrationData } from '@/types/payment';
+import { supabase } from '@/lib/supabase-client';
 
 /**
  * Unified hook for managing registration data across the application
@@ -133,6 +134,61 @@ export const useUnifiedRegistrationData = () => {
 
     loadData();
   }, [contextRegistrationData, updateContextRegistrationData, setPendingSubscription]);
+
+  useEffect(() => {
+    const fetchServerToken = async () => {
+      if (!user || registrationData?.paymentToken?.token) return;
+
+      try {
+        const { data, error } = await supabase
+          .from('payment_tokens')
+          .select('token, token_expiry, card_last_four')
+          .eq('user_id', user.id)
+          .eq('is_active', true)
+          .order('created_at', { ascending: false })
+          .limit(1)
+          .maybeSingle();
+
+        if (!error && data) {
+          setRegistrationData(prev => ({
+            ...(prev || {}),
+            paymentToken: {
+              token: data.token,
+              expiry: data.token_expiry,
+              last4Digits: data.card_last_four
+            }
+          }));
+          setCurrentStep(4);
+        }
+      } catch (err) {
+        console.error('Error fetching token status:', err);
+      }
+    };
+
+    fetchServerToken();
+  }, [user, registrationData?.paymentToken]);
+
+  useEffect(() => {
+    const regId = localStorage.getItem('temp_registration_id');
+    if (!regId || registrationData?.paymentToken?.token) return;
+
+    const fetchRegistration = async () => {
+      try {
+        const { data } = await supabase.functions.invoke('cardcom-payment/get-registration-data', {
+          body: { registrationId: regId }
+        });
+
+        if (data?.registrationData?.paymentToken) {
+          setRegistrationData(prev => ({ ...(prev || {}), ...data.registrationData }));
+          setCurrentStep(4);
+        }
+      } catch (err) {
+        console.error('Failed to fetch registration token', err);
+      }
+    };
+
+    fetchRegistration();
+  }, []);
 
   // Update registration data in both state and storage
   const updateRegistrationData = (newData: Partial<RegistrationData>) => {
