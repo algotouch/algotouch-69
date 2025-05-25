@@ -275,3 +275,10 @@ type NonEmptyArray<T> = [T, ...T[]];
 - The use of `any` should be flagged for refactoring
 
 Following these guidelines will help maintain high-quality TypeScript code in the AlgoTouch project and prevent common type-related issues.
+
+## Production Logging
+
+- Use `debugLog` from `src/lib/logger` for client-side debugging statements.
+- Edge functions should import `debugLog` from `_shared/logger.ts`.
+- Avoid `console.log` directly to prevent leaking sensitive data in production.
+

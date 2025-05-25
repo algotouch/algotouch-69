@@ -1,3 +1,4 @@
+import { debugLog } from '@/lib/logger';
 
 import React, { useEffect } from 'react';
 import { Navigate } from 'react-router-dom';
@@ -33,7 +34,7 @@ const SubscriptionContent = () => {
 
   // Additional validation every time the step changes
   useEffect(() => {
-    console.log(`Current step changed to: ${currentStep}`, {
+    debugLog(`Current step changed to: ${currentStep}`, {
       selectedPlan,
       contractId,
       isAuthenticated
@@ -62,7 +63,7 @@ const SubscriptionContent = () => {
   }
 
   if (isAuthenticated && hasActiveSubscription) {
-    console.log('User has active subscription, redirecting to my-subscription page');
+    debugLog('User has active subscription, redirecting to my-subscription page');
     return <Navigate to="/my-subscription" replace />;
   }
 

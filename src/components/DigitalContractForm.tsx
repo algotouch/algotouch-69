@@ -1,3 +1,4 @@
+import { debugLog } from '@/lib/logger';
 
 import React, { useState, useEffect, useRef } from 'react';
 import { Button } from '@/components/ui/button';
@@ -101,7 +102,7 @@ const DigitalContractForm: React.FC<DigitalContractFormProps> = ({
     
     try {
       setIsSigningInProgress(true);
-      console.log("Preparing contract data for signing...");
+      debugLog("Preparing contract data for signing...");
       
       // Store signing information in session storage for continued registration flow
       if (registrationData) {
@@ -139,7 +140,7 @@ const DigitalContractForm: React.FC<DigitalContractFormProps> = ({
         browserInfo: getBrowserInfo()
       };
       
-      console.log("Calling onSign with contract data", {
+      debugLog("Calling onSign with contract data", {
         fullName: contractData.fullName,
         hasSignature: Boolean(contractData.signature),
         hasContractHtml: Boolean(contractData.contractHtml),

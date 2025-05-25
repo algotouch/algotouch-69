@@ -1,3 +1,4 @@
+import { debugLog } from '@/lib/logger';
 
 /**
  * Service worker initialization and management module
@@ -34,7 +35,7 @@ export const initializeServiceWorker = (): void => {
       navigator.serviceWorker.getRegistrations().then(registrations => {
         for (let registration of registrations) {
           registration.unregister();
-          console.log('Unregistered previous service worker');
+          debugLog('Unregistered previous service worker');
         }
         
         // Register fresh service worker with relative path
@@ -42,11 +43,11 @@ export const initializeServiceWorker = (): void => {
           scope: './',
           updateViaCache: 'none' // Never use cache for the service worker itself
         }).then(registration => {
-          console.log('ServiceWorker registered with scope:', registration.scope);
+          debugLog('ServiceWorker registered with scope:', registration.scope);
           
           // Force update if needed
           if (registration.waiting) {
-            console.log('New service worker waiting to activate');
+            debugLog('New service worker waiting to activate');
             registration.waiting.postMessage({ type: 'SKIP_WAITING' });
           }
           
@@ -56,7 +57,7 @@ export const initializeServiceWorker = (): void => {
             if (newWorker) {
               newWorker.addEventListener('statechange', () => {
                 if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
-                  console.log('New service worker installed and ready');
+                  debugLog('New service worker installed and ready');
                   // Force activation
                   newWorker.postMessage({ type: 'SKIP_WAITING' });
                 }
@@ -75,7 +76,7 @@ export const initializeServiceWorker = (): void => {
     navigator.serviceWorker.addEventListener('controllerchange', () => {
       if (!refreshing) {
         refreshing = true;
-        console.log('Service worker controller changed, reloading for latest version');
+        debugLog('Service worker controller changed, reloading for latest version');
         window.location.reload();
       }
     });
@@ -99,7 +100,7 @@ export function setupDirectFailsafe(): void {
       
       // Clear cache by appending a timestamp to requested URLs
       window.__VITE_TIMESTAMP__ = createTimestamp();
-      console.log('Setting cache buster timestamp:', window.__VITE_TIMESTAMP__);
+      debugLog('Setting cache buster timestamp:', window.__VITE_TIMESTAMP__);
       
       // Extract module URL to detect which module failed
       const moduleUrl = event.message.match(/https?:\/\/[^'\s]+\.js/)?.[0] || '';
@@ -110,7 +111,7 @@ export function setupDirectFailsafe(): void {
       
       // Handle specific module failures
       if (isDashboardModule || isAuthModule) {
-        console.log('Critical module failed to load, redirecting to home page...');
+        debugLog('Critical module failed to load, redirecting to home page...');
         setTimeout(() => {
           window.location.href = `./?t=${window.__VITE_TIMESTAMP__}`;
         }, 1000);
@@ -179,7 +180,7 @@ export function prefetchCriticalModules(): void {
       document.head.appendChild(link);
     });
     
-    console.log('Prefetching critical modules');
+    debugLog('Prefetching critical modules');
   } catch (e) {
     console.warn('Failed to prefetch critical modules:', e);
   }
@@ -201,7 +202,7 @@ export function setupModuleErrorHandlers(): void {
       if (navigator.serviceWorker && navigator.serviceWorker.controller) {
         const moduleUrl = event.message.match(/https?:\/\/[^'\s]+\.js/)?.[0];
         if (moduleUrl) {
-          console.log('Asking service worker to retry failed module:', moduleUrl);
+          debugLog('Asking service worker to retry failed module:', moduleUrl);
           navigator.serviceWorker.controller.postMessage({
             type: 'RETRY_FAILED_MODULES',
             modules: [moduleUrl]
@@ -211,7 +212,7 @@ export function setupModuleErrorHandlers(): void {
           navigator.serviceWorker.addEventListener('message', (msgEvent) => {
             if (msgEvent.data?.type === 'MODULE_PREFETCH_RESULT') {
               if (msgEvent.data.success) {
-                console.log('Module recovery successful, reloading...');
+                debugLog('Module recovery successful, reloading...');
                 window.location.reload();
               }
             }

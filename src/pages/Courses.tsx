@@ -1,3 +1,4 @@
+import { debugLog } from '@/lib/logger';
 
 import React, { useState, Suspense } from 'react';
 import Layout from '@/components/Layout';
@@ -48,7 +49,7 @@ const CoursesPageContent = () => {
   
   // Function to log which course was selected
   const handleCourseClick = (courseId: string) => {
-    console.log("קורס נבחר:", courseId);
+    debugLog("קורס נבחר:", courseId);
     setSelectedCourseId(courseId);
   };
 

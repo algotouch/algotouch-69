@@ -1,3 +1,4 @@
+import { debugLog } from '@/lib/logger';
 
 import React, { useEffect } from 'react';
 import Layout from '@/components/Layout';
@@ -25,7 +26,7 @@ function CalendarPage() {
 
   // Log loaded data on render for debugging
   useEffect(() => {
-    console.log("Calendar render state:", { 
+    debugLog("Calendar render state:", { 
       tradesByDayCount: Object.keys(tradesByDay).length,
       lastUpdate: new Date(lastUpdateTimestamp).toLocaleTimeString(),
       viewMode
@@ -33,11 +34,11 @@ function CalendarPage() {
     
     // Debug data by logging keys
     if (Object.keys(tradesByDay).length > 0) {
-      console.log("Calendar days with data:", Object.keys(tradesByDay).join(", "));
+      debugLog("Calendar days with data:", Object.keys(tradesByDay).join(", "));
       
       // Check a sample day
       const sampleKey = Object.keys(tradesByDay)[0];
-      console.log(`Sample day ${sampleKey} has ${tradesByDay[sampleKey].length} trades`);
+      debugLog(`Sample day ${sampleKey} has ${tradesByDay[sampleKey].length} trades`);
     }
   }, [tradesByDay, lastUpdateTimestamp, viewMode]);
 

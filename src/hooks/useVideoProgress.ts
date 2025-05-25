@@ -1,3 +1,4 @@
+import { debugLog } from '@/lib/logger';
 
 import { useState, useCallback } from 'react';
 
@@ -18,19 +19,19 @@ export function useVideoProgress({
   
   // Handle video progress tracking
   const handleVideoProgress = useCallback((event: any) => {
-    console.log(`Video progress for lesson "${videoTitle}":`, event);
+    debugLog(`Video progress for lesson "${videoTitle}":`, event);
   }, [videoTitle]);
   
   // Handle video completion
   const handleVideoEnded = useCallback(async () => {
-    console.log(`Video completed: ${videoTitle}`);
+    debugLog(`Video completed: ${videoTitle}`);
     
     if (lessonId && recordLessonWatched) {
       try {
         const result = await recordLessonWatched(courseId, lessonId.toString());
         if (result) {
           setVideoCompleted(true);
-          console.log(`Lesson ${lessonId} marked as watched for course ${courseId}`);
+          debugLog(`Lesson ${lessonId} marked as watched for course ${courseId}`);
         }
       } catch (error) {
         console.error('Failed to record lesson watched:', error);

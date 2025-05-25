@@ -1,3 +1,4 @@
+import { debugLog } from '../_shared/logger.ts';
 
 // Follow Deno's HTTP server implementation
 import { corsHeaders } from '../_shared/cors.ts';
@@ -47,7 +48,7 @@ const CONFIG = {
 
 // Helper function for structured logging
 function logInfo(message: string, data?: any) {
-  console.log(`INFO: ${message}`, data ? JSON.stringify(data) : '');
+  debugLog(`INFO: ${message}`, data ? JSON.stringify(data) : '');
 }
 
 function logError(message: string, error?: any) {

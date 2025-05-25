@@ -1,3 +1,4 @@
+import { debugLog } from '@/lib/logger';
 
 /**
  * Service Worker Manager for handling registration and lifecycle
@@ -50,7 +51,7 @@ export class ServiceWorkerManager {
         }
       );
 
-      console.log('Service worker registered with scope:', this.registration.scope);
+      debugLog('Service worker registered with scope:', this.registration.scope);
 
       // Setup listeners for updates
       this.setupUpdateHandlers();
@@ -70,7 +71,7 @@ export class ServiceWorkerManager {
       const registrations = await navigator.serviceWorker.getRegistrations();
       for (const registration of registrations) {
         await registration.unregister();
-        console.log('Unregistered service worker');
+        debugLog('Unregistered service worker');
       }
     } catch (error) {
       console.error('Error unregistering service workers:', error);
@@ -104,7 +105,7 @@ export class ServiceWorkerManager {
     navigator.serviceWorker.addEventListener('controllerchange', () => {
       if (!this.refreshing) {
         this.refreshing = true;
-        console.log('New service worker controlling the page, reloading...');
+        debugLog('New service worker controlling the page, reloading...');
         window.location.reload();
       }
     });
@@ -114,7 +115,7 @@ export class ServiceWorkerManager {
    * Update a service worker by sending the SKIP_WAITING message
    */
   private updateServiceWorker(worker: ServiceWorker): void {
-    console.log('Updating service worker...');
+    debugLog('Updating service worker...');
     worker.postMessage({ type: 'SKIP_WAITING' });
   }
 

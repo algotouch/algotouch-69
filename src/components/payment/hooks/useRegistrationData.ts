@@ -1,3 +1,4 @@
+import { debugLog } from '@/lib/logger';
 
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/contexts/auth';
@@ -28,7 +29,7 @@ export const useRegistrationData = () => {
   const loadRegistrationData = () => {
     if (contextRegistrationData) {
       setRegistrationData(contextRegistrationData as RegistrationData);
-      console.log("Loaded registration data from context:", {
+      debugLog("Loaded registration data from context:", {
         email: contextRegistrationData.email,
         hasUserData: !!contextRegistrationData.userData,
         planId: contextRegistrationData.planId
@@ -36,7 +37,7 @@ export const useRegistrationData = () => {
       
       return true;
     } else {
-      console.log("No registration data found but that's okay - user can pay first and register later");
+      debugLog("No registration data found but that's okay - user can pay first and register later");
       return true;
     }
   };

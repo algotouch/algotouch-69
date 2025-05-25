@@ -1,3 +1,4 @@
+import { debugLog } from '@/lib/logger';
 
 import { useEffect } from 'react';
 import { toast } from 'sonner';
@@ -15,7 +16,7 @@ export const usePaymentUrlParams = (
     if (paymentDataString) {
       try {
         const paymentData = JSON.parse(paymentDataString);
-        console.log('Found stored payment data:', paymentData);
+        debugLog('Found stored payment data:', paymentData);
         
         // Only process recently stored data (within last 5 minutes)
         const timestamp = new Date(paymentData.timestamp).getTime();
@@ -26,10 +27,10 @@ export const usePaymentUrlParams = (
           // If we have a registration ID, verify the payment with the backend
           const regId = localStorage.getItem('temp_registration_id');
           if (regId) {
-            console.log('Found registration ID, verifying payment:', regId);
+            debugLog('Found registration ID, verifying payment:', regId);
             verifyPaymentAndCompleteRegistration(regId, onPaymentComplete, setIsLoading);
           } else {
-            console.log('No registration ID found, completing payment directly');
+            debugLog('No registration ID found, completing payment directly');
             onPaymentComplete();
           }
           
@@ -47,7 +48,7 @@ export const usePaymentUrlParams = (
     // Always check for temp registration ID in localStorage
     const storedRegId = localStorage.getItem('temp_registration_id');
     if (storedRegId) {
-      console.log('Found stored registration ID:', storedRegId);
+      debugLog('Found stored registration ID:', storedRegId);
       retrieveAndProcessRegistrationData(storedRegId, onPaymentComplete);
     }
     
@@ -65,10 +66,10 @@ export const usePaymentUrlParams = (
         return;
       }
 
-      console.log('Received message:', event.data);
+      debugLog('Received message:', event.data);
       
       if (event.data?.type === 'cardcom-paid') {
-        console.log('Payment successful:', event.data.details);
+        debugLog('Payment successful:', event.data.details);
         
         // Store the payment data in sessionStorage for later validation
         if (event.data?.details) {
@@ -83,10 +84,10 @@ export const usePaymentUrlParams = (
         // If we have a registration ID, verify the payment with the backend
         const regId = localStorage.getItem('temp_registration_id');
         if (regId) {
-          console.log('Verifying payment with registration ID:', regId);
+          debugLog('Verifying payment with registration ID:', regId);
           verifyPaymentAndCompleteRegistration(regId, onPaymentComplete, setIsLoading);
         } else {
-          console.log('Completing payment without registration ID');
+          debugLog('Completing payment without registration ID');
           onPaymentComplete();
         }
         

@@ -1,3 +1,4 @@
+import { debugLog } from '@/lib/logger';
 
 import React, { useEffect } from 'react';
 import { Navigate } from 'react-router-dom';
@@ -8,7 +9,7 @@ const Index = () => {
   // Clear any stale registration data when landing on the index page
   useEffect(() => {
     // Log supabase client configuration for debugging
-    console.log('Supabase client initialized');
+    debugLog('Supabase client initialized');
     
     // Check if Supabase connection is working
     const checkSupabaseConnection = async () => {
@@ -19,7 +20,7 @@ const Index = () => {
           // Store the error for the error page
           localStorage.setItem('auth_error', `Supabase connection failed: ${error.message}`);
         } else {
-          console.log('Supabase connection test successful');
+          debugLog('Supabase connection test successful');
         }
       } catch (err: any) {
         console.error('Error testing Supabase connection:', err);
@@ -43,7 +44,7 @@ const Index = () => {
       const sessionKey = `sb-${projectRef}-auth-token`;
       
       if (localStorage.getItem(sessionKey)) {
-        console.log('Found existing Supabase session in localStorage');
+        debugLog('Found existing Supabase session in localStorage');
       }
     } catch (err) {
       console.error('Error checking Supabase session:', err);

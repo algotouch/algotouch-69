@@ -1,3 +1,4 @@
+import { debugLog } from '@/lib/logger';
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useSubscription } from '@/hooks/useSubscription';
@@ -51,7 +52,7 @@ const UserSubscription = () => {
   useEffect(() => {
     if (!loading && (subscription || hasActiveSubscription)) {
       sessionStorage.removeItem('registration_data');
-      console.log('Registration data cleared due to existing subscription');
+      debugLog('Registration data cleared due to existing subscription');
     }
   }, [loading, subscription, hasActiveSubscription]);
   
@@ -96,7 +97,7 @@ const UserSubscription = () => {
               toast.success('עדכון פרטי המנוי הושלם בהצלחה');
               await refreshSubscription();
             } else {
-              console.log('Auto-processing failed:', data?.message);
+              debugLog('Auto-processing failed:', data?.message);
               setRetryCount(prev => prev + 1);
             }
           } catch (err) {

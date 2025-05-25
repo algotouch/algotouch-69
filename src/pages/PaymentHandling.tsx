@@ -1,3 +1,4 @@
+import { debugLog } from '@/lib/logger';
 
 import React, { useEffect, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
@@ -27,7 +28,7 @@ const PaymentHandling: React.FC = () => {
 
     // Check authentication state
     if (!isAuthenticated && !regId) {
-      console.log('User not authenticated, redirecting to login');
+      debugLog('User not authenticated, redirecting to login');
       navigate('/auth', { state: { from: location } });
       return;
     }

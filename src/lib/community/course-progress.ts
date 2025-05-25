@@ -1,3 +1,4 @@
+import { debugLog } from '@/lib/logger';
 
 import { supabase } from '@/integrations/supabase/client';
 
@@ -50,7 +51,7 @@ export async function recordLessonWatched(userId: string, courseId: string): Pro
         });
     }
     
-    console.log(`Lesson ${userId} recorded as watched for course ${courseId}`);
+    debugLog(`Lesson ${userId} recorded as watched for course ${courseId}`);
     return true;
   } catch (error) {
     console.error('Error recording lesson watched:', error);

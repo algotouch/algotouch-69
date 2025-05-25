@@ -1,3 +1,4 @@
+import { debugLog } from '@/lib/logger';
 
 import { supabase } from '@/integrations/supabase/client';
 
@@ -49,7 +50,7 @@ export async function completeModule(userId: string, courseId: string): Promise<
         });
     }
     
-    console.log(`Module ${userId} marked as completed for course ${courseId}`);
+    debugLog(`Module ${userId} marked as completed for course ${courseId}`);
     return true;
   } catch (error) {
     console.error('Error completing module:', error);

@@ -1,3 +1,4 @@
+import { debugLog } from '@/lib/logger';
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -72,7 +73,7 @@ const SignupForm: React.FC<SignupFormProps> = ({ onSignupSuccess }) => {
     
     try {
       setSigningUp(true);
-      console.log('Starting registration process for:', email);
+      debugLog('Starting registration process for:', email);
       
       // Use auth context to sign up - Fix by providing email and password as string arguments
       const { success, error } = await signUp(email, password, {
@@ -99,7 +100,7 @@ const SignupForm: React.FC<SignupFormProps> = ({ onSignupSuccess }) => {
       // Set pending subscription flag
       setPendingSubscription(true);
       
-      console.log('Registration data saved to context');
+      debugLog('Registration data saved to context');
       toast.success('הפרטים נשמרו בהצלחה');
       
       // Navigate directly to subscription page

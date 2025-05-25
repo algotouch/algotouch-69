@@ -1,3 +1,4 @@
+import { debugLog } from '@/lib/logger';
 
 import React, { useState, useEffect, useRef } from 'react';
 import Layout from '@/components/Layout';
@@ -43,7 +44,7 @@ const MonthlyReport = () => {
   const handleUpload = async (file: File) => {
     if (!file) return;
     try {
-      console.log("Processing file:", file.name);
+      debugLog("Processing file:", file.name);
       const tradeData = await parseCSVFile(file);
       
       if (tradeData.length === 0) {
@@ -64,7 +65,7 @@ const MonthlyReport = () => {
       setStats(tradeStats);
       
       // Finally, update the global store for calendar use
-      console.log("Updating global trades store with", tradeData.length, "trades");
+      debugLog("Updating global trades store with", tradeData.length, "trades");
       setGlobalTrades(tradeData);
       
       toast({

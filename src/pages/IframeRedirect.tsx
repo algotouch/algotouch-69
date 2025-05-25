@@ -1,3 +1,4 @@
+import { debugLog } from '@/lib/logger';
 
 import React from 'react';
 import Layout from '@/components/Layout';
@@ -16,7 +17,7 @@ function IframeRedirect() {
     });
     
     // Handle iframe redirect logic here
-    console.log("IframeRedirect component mounted");
+    debugLog("IframeRedirect component mounted");
   }, [toast]);
 
   return (

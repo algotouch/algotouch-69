@@ -1,3 +1,4 @@
+import { debugLog } from '../_shared/logger.ts';
 
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.14.0";
@@ -48,7 +49,7 @@ serve(async (req) => {
       throw new Error('חסרים פרטי משתמש');
     }
 
-    console.log('Starting user registration:', {
+    debugLog('Starting user registration:', {
       email: registrationData.email,
       firstName: registrationData.userData.firstName,
       planId: registrationData.planId,
@@ -78,7 +79,7 @@ serve(async (req) => {
       throw new Error('יצירת משתמש נכשלה');
     }
 
-    console.log('User created successfully:', userData.user.id);
+    debugLog('User created successfully:', userData.user.id);
 
     const isMonthlyPlan = registrationData.planId === 'monthly';
     let trialEndsAt: Date | null = null;
@@ -105,7 +106,7 @@ serve(async (req) => {
     .select('id')
     .single();
 
-  console.log('Subscription created successfully', subscriptionData.id);
+  debugLog('Subscription created successfully', subscriptionData.id);
 
   await supabaseClient.from('payment_history').insert({
     user_id: userData.user.id,
@@ -120,7 +121,7 @@ serve(async (req) => {
       throw subscriptionError;
     }
 
-    console.log('Subscription created successfully', subscriptionData.id);
+    debugLog('Subscription created successfully', subscriptionData.id);
 
       // Create payment history record using the actual subscription id
       await supabaseClient.from('payment_history').insert({
@@ -158,7 +159,7 @@ serve(async (req) => {
             ipAddress = ipData.ip;
           }
         } catch (e) {
-          console.log('Could not get IP address, continuing without it');
+          debugLog('Could not get IP address, continuing without it');
         }
 
         // Store the contract signature
@@ -187,7 +188,7 @@ serve(async (req) => {
         if (signatureError) {
           console.error('Error storing contract signature:', signatureError);
         } else {
-          console.log('Contract signature stored successfully');
+          debugLog('Contract signature stored successfully');
         }
       } catch (signatureError) {
         console.error('Exception storing signature:', signatureError);

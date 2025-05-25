@@ -1,3 +1,4 @@
+import { debugLog } from '@/lib/logger';
 import React, { Suspense, lazy } from 'react';
 import { BrowserRouter, Routes, Route, Navigate, Outlet } from 'react-router-dom';
 import { Toaster } from 'sonner';
@@ -18,7 +19,7 @@ import AuthLoadError from '@/pages/AuthLoadError';
 
 // Lazy loaded routes with retry utility
 const loadModuleWithRetry = (importFn, name) => {
-  console.log(`Loading module: ${name}`);
+  debugLog(`Loading module: ${name}`);
   return importFn().catch(error => {
     console.error(`Error loading ${name}:`, error);
     throw error;

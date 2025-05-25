@@ -1,3 +1,4 @@
+import { debugLog } from '../_shared/logger.ts';
 
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.31.0";
@@ -44,7 +45,7 @@ serve(async (req) => {
 
     // Send recovery email - this is just a placeholder
     // In a real implementation, you would call an email service here
-    console.log(`Recovery email would be sent to ${email} with recovery URL: ${recoveryUrl}`);
+    debugLog(`Recovery email would be sent to ${email} with recovery URL: ${recoveryUrl}`);
 
     return new Response(
       JSON.stringify({ success: true }),

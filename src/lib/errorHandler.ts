@@ -1,3 +1,4 @@
+import { debugLog } from '@/lib/logger';
 // Global error handler for module loading issues and other runtime errors
 
 type FailedModuleInfo = {
@@ -78,7 +79,7 @@ function handleModuleLoadError(moduleUrl: string) {
   
   // If we haven't exceeded max attempts, try to recover
   if (moduleInfo.attempts <= MAX_RETRY_ATTEMPTS) {
-    console.log(`Attempting to recover failed module (${moduleInfo.attempts}/${MAX_RETRY_ATTEMPTS}): ${moduleUrl}`);
+    debugLog(`Attempting to recover failed module (${moduleInfo.attempts}/${MAX_RETRY_ATTEMPTS}): ${moduleUrl}`);
     
     // Try to prefetch via service worker if available
     if ('serviceWorker' in navigator && navigator.serviceWorker.controller) {

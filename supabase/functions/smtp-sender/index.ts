@@ -1,3 +1,4 @@
+import { debugLog } from '../_shared/logger.ts';
 
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { SmtpClient } from "https://deno.land/x/smtp@v0.7.0/mod.ts";
@@ -93,7 +94,7 @@ serve(async (req) => {
     }
 
     // Send email
-    console.log(`Sending email to ${typeof emailData.to === 'string' ? emailData.to : emailData.to.join(', ')}`);
+    debugLog(`Sending email to ${typeof emailData.to === 'string' ? emailData.to : emailData.to.join(', ')}`);
     await client.send({
       from: smtpUser,
       to: emailData.to,
@@ -105,7 +106,7 @@ serve(async (req) => {
 
     await client.close();
 
-    console.log("Email sent successfully");
+    debugLog("Email sent successfully");
     return new Response(
       JSON.stringify({ success: true, message: "Email sent successfully" }),
       {

@@ -1,3 +1,4 @@
+import { debugLog } from '@/lib/logger';
 
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { supabase } from '@/integrations/supabase/client';
@@ -132,7 +133,7 @@ export const SubscriptionProvider: React.FC<SubscriptionProviderProps> = ({ chil
               email: user.email || ''
             });
 
-            console.log('Profile data loaded:', profileData);
+            debugLog('Profile data loaded:', profileData);
           }
         } catch (err) {
           console.error('Error loading user data:', err);
@@ -210,7 +211,7 @@ export const SubscriptionProvider: React.FC<SubscriptionProviderProps> = ({ chil
       
       // Check if we have a valid recurring payment token
       if (data.status === 'active' && !data.token) {
-        console.log('Active subscription without token, checking payment_tokens');
+        debugLog('Active subscription without token, checking payment_tokens');
         
         try {
           // Try to find a token in payment_tokens
@@ -236,7 +237,7 @@ export const SubscriptionProvider: React.FC<SubscriptionProviderProps> = ({ chil
             // Additional validation to ensure token is not expired
             // This uses date-fns to properly compare dates
             if (isAfter(tokenExpiryDate, today)) {
-              console.log('Found valid token in payment_tokens, syncing to subscription');
+              debugLog('Found valid token in payment_tokens, syncing to subscription');
               
               // Update subscription with token
               const { error: updateError } = await supabase
@@ -250,12 +251,12 @@ export const SubscriptionProvider: React.FC<SubscriptionProviderProps> = ({ chil
               if (updateError) {
                 console.error('Error updating subscription with token:', updateError);
               } else {
-                console.log(`Subscription ${data.id} updated with token ${recurringPayments[0].token}`);
+                debugLog(`Subscription ${data.id} updated with token ${recurringPayments[0].token}`);
                 // Refresh subscription details after update
                 refreshSubscription();
               }
             } else {
-              console.log('Found token but it appears to be expired:', 
+              debugLog('Found token but it appears to be expired:', 
                 format(tokenExpiryDate, 'yyyy-MM-dd'), 
                 'vs today:', format(today, 'yyyy-MM-dd'));
             }

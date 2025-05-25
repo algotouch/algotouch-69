@@ -1,3 +1,4 @@
+import { debugLog } from '@/lib/logger';
 
 import React, { useState, useEffect } from 'react';
 import Layout from '@/components/Layout';
@@ -67,7 +68,7 @@ const TradeJournalPage = () => {
     setIsLoading(true);
     
     try {
-      console.log('Form data:', data);
+      debugLog('Form data:', data);
       
       // Create a new report with unique ID
       const newReport: ReportData = {

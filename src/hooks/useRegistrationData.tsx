@@ -1,3 +1,4 @@
+import { debugLog } from '@/lib/logger';
 
 import { useState, useEffect } from 'react';
 
@@ -48,12 +49,12 @@ export const useRegistrationData = () => {
         
         // If data is too old, ignore it
         if (!registrationTime || !isValid) {
-          console.log('Registration data has expired, clearing session');
+          debugLog('Registration data has expired, clearing session');
           sessionStorage.removeItem('registration_data');
           return;
         }
         
-        console.log('Registration data found:', { 
+        debugLog('Registration data found:', { 
           email: data.email, 
           firstName: data.userData?.firstName,
           registrationTime: data.registrationTime,

@@ -1,3 +1,4 @@
+import { debugLog } from '../_shared/logger.ts';
 
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.7.1";
@@ -31,7 +32,7 @@ interface SigningRequest {
 }
 
 function createSupabaseClient() {
-  console.log("Creating Supabase client");
+  debugLog("Creating Supabase client");
   const SUPABASE_URL = Deno.env.get("SUPABASE_URL");
   const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
 
@@ -44,7 +45,7 @@ function createSupabaseClient() {
 }
 
 function validateRequest(request: SigningRequest) {
-  console.log("Validating request fields");
+  debugLog("Validating request fields");
   const requiredFields = ['userId', 'planId', 'fullName', 'signature', 'email'];
   const missingFields = requiredFields.filter(field => !request[field as keyof SigningRequest]);
   
@@ -53,11 +54,11 @@ function validateRequest(request: SigningRequest) {
     throw new Error(`Missing required fields: ${missingFields.join(', ')}`);
   }
   
-  console.log("Request validation successful");
+  debugLog("Request validation successful");
 }
 
 async function storeSignature(supabase: any, request: SigningRequest, ipAddress: string) {
-  console.log(`Storing signature for user: ${request.userId}, plan: ${request.planId}`);
+  debugLog(`Storing signature for user: ${request.userId}, plan: ${request.planId}`);
   try {
     // Store the contract HTML in storage first
     const contractFileName = `${request.userId}/contract_${new Date().toISOString().replace(/[:.]/g, '-')}.html`;
@@ -65,12 +66,12 @@ async function storeSignature(supabase: any, request: SigningRequest, ipAddress:
     
     // Create contracts bucket if it doesn't exist
     try {
-      console.log("Checking if contracts bucket exists");
+      debugLog("Checking if contracts bucket exists");
       const { data: buckets } = await supabase.storage.listBuckets();
       const contractsBucketExists = buckets?.some(bucket => bucket.name === 'contracts');
       
       if (!contractsBucketExists) {
-        console.log("Contracts bucket doesn't exist, creating it");
+        debugLog("Contracts bucket doesn't exist, creating it");
         const { error: bucketError } = await supabase
           .storage
           .createBucket('contracts', {
@@ -82,20 +83,20 @@ async function storeSignature(supabase: any, request: SigningRequest, ipAddress:
         if (bucketError) {
           console.error("Error creating bucket:", bucketError);
         } else {
-          console.log("Created contracts bucket successfully");
+          debugLog("Created contracts bucket successfully");
         }
       } else {
-        console.log("Contracts bucket exists");
+        debugLog("Contracts bucket exists");
       }
     } catch (bucketCheckError) {
-      console.log("Bucket check error, attempting to create it:", bucketCheckError);
+      debugLog("Bucket check error, attempting to create it:", bucketCheckError);
       try {
         await supabase.storage.createBucket('contracts', {
           public: false,
           fileSizeLimit: 10485760, // 10MB
           allowedMimeTypes: ['text/html', 'application/pdf']
         });
-        console.log("Created contracts bucket successfully after error");
+        debugLog("Created contracts bucket successfully after error");
       } catch (createBucketError) {
         console.error("Failed to create contracts bucket:", createBucketError);
       }
@@ -107,15 +108,15 @@ async function storeSignature(supabase: any, request: SigningRequest, ipAddress:
     
     // Make sure the user folder exists
     const userFolder = request.userId;
-    console.log(`Checking user folder: ${userFolder}`);
+    debugLog(`Checking user folder: ${userFolder}`);
     try {
       await supabase.storage.from('contracts').list(userFolder);
-      console.log("User folder exists or will be created automatically");
+      debugLog("User folder exists or will be created automatically");
     } catch (folderError) {
-      console.log("Error checking user folder, will be created on upload:", folderError);
+      debugLog("Error checking user folder, will be created on upload:", folderError);
     }
     
-    console.log(`Uploading contract file to storage: ${contractFileName}`);
+    debugLog(`Uploading contract file to storage: ${contractFileName}`);
     
     const { data: storageData, error: storageError } = await supabase
       .storage
@@ -133,7 +134,7 @@ async function storeSignature(supabase: any, request: SigningRequest, ipAddress:
       console.error("Error storing contract in storage:", storageError);
       console.error("Storage error details:", JSON.stringify(storageError));
     } else {
-      console.log("Contract stored in storage successfully:", storageData.path);
+      debugLog("Contract stored in storage successfully:", storageData.path);
     }
     
     // Create a signed URL for the contract
@@ -143,10 +144,10 @@ async function storeSignature(supabase: any, request: SigningRequest, ipAddress:
       .createSignedUrl(contractFileName, 60 * 60 * 24 * 7); // 7 days expiry
     
     const contractUrl = urlError ? null : urlData?.signedUrl;
-    console.log("Contract signed URL created:", contractUrl ? "success" : "failed");
+    debugLog("Contract signed URL created:", contractUrl ? "success" : "failed");
     
     // Now store the signature info in the database
-    console.log("Inserting contract signature into database");
+    debugLog("Inserting contract signature into database");
     const { data: signatureData, error: signatureError } = await supabase
       .from("contract_signatures")
       .insert({
@@ -175,7 +176,7 @@ async function storeSignature(supabase: any, request: SigningRequest, ipAddress:
       throw signatureError;
     }
     
-    console.log("Signature stored successfully with ID:", signatureData.id);
+    debugLog("Signature stored successfully with ID:", signatureData.id);
     return signatureData;
   } catch (error) {
     console.error("Exception storing signature:", error);
@@ -184,7 +185,7 @@ async function storeSignature(supabase: any, request: SigningRequest, ipAddress:
 }
 
 async function updateSubscription(supabase: any, userId: string, planId: string, signatureTimestamp: string) {
-  console.log(`Updating subscription for user: ${userId}, plan: ${planId}`);
+  debugLog(`Updating subscription for user: ${userId}, plan: ${planId}`);
   try {
     const { error: updateError } = await supabase
       .from("subscriptions")
@@ -201,7 +202,7 @@ async function updateSubscription(supabase: any, userId: string, planId: string,
       throw updateError;
     }
     
-    console.log("Subscription updated successfully");
+    debugLog("Subscription updated successfully");
   } catch (error) {
     console.error("Exception updating subscription:", error);
     throw new Error(`Failed to update subscription: ${error.message}`);
@@ -209,7 +210,7 @@ async function updateSubscription(supabase: any, userId: string, planId: string,
 }
 
 async function sendEmailDirectly(supabase: any, to: string, subject: string, htmlBody: string, attachmentData?: any) {
-  console.log(`Sending email to ${to} via smtp-sender function`);
+  debugLog(`Sending email to ${to} via smtp-sender function`);
   
   try {
     const emailData = {
@@ -225,7 +226,7 @@ async function sendEmailDirectly(supabase: any, to: string, subject: string, htm
     });
     
     if (smtpError || !smtpData?.success) {
-      console.log("SMTP sender failed, trying Gmail sender as fallback:", smtpError || smtpData);
+      debugLog("SMTP sender failed, trying Gmail sender as fallback:", smtpError || smtpData);
       
       // Try Gmail sender as fallback
       const { data: gmailData, error: gmailError } = await supabase.functions.invoke('gmail-sender', {
@@ -248,10 +249,10 @@ async function sendEmailDirectly(supabase: any, to: string, subject: string, htm
 }
 
 serve(async (req) => {
-  console.log("IziDoc Sign function called:", req.method, req.url);
+  debugLog("IziDoc Sign function called:", req.method, req.url);
   
   if (req.method === "OPTIONS") {
-    console.log("Handling CORS preflight request");
+    debugLog("Handling CORS preflight request");
     return new Response(null, {
       headers: corsHeaders,
     });
@@ -261,7 +262,7 @@ serve(async (req) => {
     let request: SigningRequest;
     try {
       request = await req.json();
-      console.log("Request body parsed successfully");
+      debugLog("Request body parsed successfully");
     } catch (parseError) {
       console.error("Error parsing request body:", parseError);
       return new Response(
@@ -276,7 +277,7 @@ serve(async (req) => {
     let supabase;
     try {
       supabase = createSupabaseClient();
-      console.log("Supabase client created successfully");
+      debugLog("Supabase client created successfully");
     } catch (clientError) {
       console.error("Error creating Supabase client:", clientError);
       return new Response(
@@ -290,7 +291,7 @@ serve(async (req) => {
     
     const forwarded = req.headers.get("x-forwarded-for");
     const ipAddress = forwarded ? forwarded.split(/\s*,\s*/)[0] : req.headers.get("cf-connecting-ip") || "";
-    console.log("Client IP address:", ipAddress);
+    debugLog("Client IP address:", ipAddress);
     
     try {
       validateRequest(request);
@@ -305,7 +306,7 @@ serve(async (req) => {
       );
     }
     
-    console.log("Processing digital signature for user:", request.userId);
+    debugLog("Processing digital signature for user:", request.userId);
     
     let documentId, signatureId, signatureTimestamp;
     try {
@@ -315,7 +316,7 @@ serve(async (req) => {
       signatureId = crypto.randomUUID();
       signatureTimestamp = new Date().toISOString();
       
-      console.log("Signature stored with document ID:", documentId);
+      debugLog("Signature stored with document ID:", documentId);
     } catch (signatureError) {
       console.error("Error storing signature:", signatureError);
       return new Response(
@@ -329,7 +330,7 @@ serve(async (req) => {
     
     try {
       await updateSubscription(supabase, request.userId, request.planId, signatureTimestamp);
-      console.log("Subscription updated successfully");
+      debugLog("Subscription updated successfully");
     } catch (subscriptionError) {
       console.error("Error updating subscription (continuing anyway):", subscriptionError);
     }
@@ -348,7 +349,7 @@ serve(async (req) => {
     };
     const formattedDateTime = new Intl.DateTimeFormat('he-IL', options).format(dateObj);
     
-    console.log("Sending simplified confirmation email to customer:", request.email);
+    debugLog("Sending simplified confirmation email to customer:", request.email);
     const customerEmailBody = `
       <div dir="rtl" style="text-align: right; font-family: Arial, sans-serif; color: #333; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #eaeaea; border-radius: 5px;">
         <div style="text-align: center; margin-bottom: 20px;">
@@ -377,7 +378,7 @@ serve(async (req) => {
     
     let customerEmailResult;
     try {
-      console.log("Sending email to customer via direct email function");
+      debugLog("Sending email to customer via direct email function");
       customerEmailResult = await sendEmailDirectly(
         supabase, 
         request.email,
@@ -390,13 +391,13 @@ serve(async (req) => {
         }]
       );
       
-      console.log("Customer email sending result:", customerEmailResult);
+      debugLog("Customer email sending result:", customerEmailResult);
     } catch (emailError) {
       console.error("Exception sending customer email:", emailError);
       customerEmailResult = { success: false, error: emailError.message };
     }
     
-    console.log("Sending email to admin");
+    debugLog("Sending email to admin");
     const adminEmailBody = `
       <div dir="rtl" style="text-align: right; font-family: Arial, sans-serif; color: #333; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #eaeaea; border-radius: 5px;">
         <h1>הסכם חדש נחתם</h1>
@@ -416,7 +417,7 @@ serve(async (req) => {
     let adminEmailResult;
     try {
       // Always send to the admin for backup purposes
-      console.log("Sending email to admin via direct email function");
+      debugLog("Sending email to admin via direct email function");
       adminEmailResult = await sendEmailDirectly(
         supabase,
         "support@algotouch.co.il",
@@ -429,13 +430,13 @@ serve(async (req) => {
         }]
       );
       
-      console.log("Admin email sending result:", adminEmailResult);
+      debugLog("Admin email sending result:", adminEmailResult);
     } catch (emailError) {
       console.error("Exception sending admin email:", emailError);
       adminEmailResult = { success: false, error: emailError.message };
     }
     
-    console.log("Contract signing process completed");
+    debugLog("Contract signing process completed");
     return new Response(
       JSON.stringify({
         success: true,

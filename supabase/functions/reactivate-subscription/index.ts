@@ -1,3 +1,4 @@
+import { debugLog } from '../_shared/logger.ts';
 
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.14.0";
@@ -119,7 +120,7 @@ serve(async (req) => {
 
       if (tokenError) {
         // Just log the error, this is not critical
-        console.log('Note: No inactive payment token found to reactivate');
+        debugLog('Note: No inactive payment token found to reactivate');
       }
     } catch (tokenError) {
       console.error('Error reactivating payment token:', tokenError);

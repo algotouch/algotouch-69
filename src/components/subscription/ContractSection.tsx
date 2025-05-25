@@ -1,6 +1,7 @@
 
 import React, { useState } from 'react';
 import DigitalContractForm from '@/components/DigitalContractForm';
+import { debugLog } from '@/lib/logger';
 import { Button } from '@/components/ui/button';
 import { AlertCircle } from 'lucide-react';
 import { Alert, AlertDescription } from '@/components/ui/alert';
@@ -26,7 +27,7 @@ const ContractSection: React.FC<ContractSectionProps> = ({
   const handleSignContract = async (contractData: any) => {
     try {
       setIsProcessing(true);
-      console.log('Contract signed, forwarding data to parent component');
+      debugLog('Contract signed, forwarding data to parent component');
       
       // Add a small delay to show the processing state
       await new Promise(resolve => setTimeout(resolve, 500));

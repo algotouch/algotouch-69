@@ -1,3 +1,4 @@
+import { debugLog } from '../_shared/logger.ts';
 
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.14.0";
@@ -34,7 +35,7 @@ serve(async (req) => {
     // Parse request body
     const payload = await req.json();
     
-    console.log('Received webhook notification:', JSON.stringify(payload));
+    debugLog('Received webhook notification:', JSON.stringify(payload));
     
     // Log the webhook data in Supabase
     const { data: logData, error: logError } = await supabaseClient
@@ -64,7 +65,7 @@ serve(async (req) => {
     } = payload;
     
     // Log the webhook data details
-    console.log('Processing webhook data:', {
+    debugLog('Processing webhook data:', {
       ResponseCode,
       LowProfileId,
       TranzactionId,
@@ -126,7 +127,7 @@ serve(async (req) => {
             // Fallback to email lookup if ReturnValue is not recognized
             if (UIValues && UIValues.CardOwnerEmail) {
               const email = UIValues.CardOwnerEmail;
-              console.log('Attempting to find user by email:', email);
+              debugLog('Attempting to find user by email:', email);
               
               // Call get-user-by-email function to look up user
               const { data: userData, error: userError } = await supabaseClient.functions.invoke('get-user-by-email', {
@@ -135,7 +136,7 @@ serve(async (req) => {
 
               if (!userError && userData?.user?.id) {
                 const userId = userData.user.id;
-                console.log(`Found user with email ${email}, ID: ${userId}`);
+                debugLog(`Found user with email ${email}, ID: ${userId}`);
                 
                 // Process as a regular user payment
                 await processUserPayment(supabaseClient, userId, payload);
@@ -156,7 +157,7 @@ serve(async (req) => {
                   details: { userId, email }
                 };
               } else {
-                console.log(`No user found with email ${email} using get-user-by-email function`);
+                debugLog(`No user found with email ${email} using get-user-by-email function`);
                 
                 // Direct lookup in auth.users table as fallback
                 const { data: authUsers, error: authError } = await supabaseClient.auth.admin.listUsers({
@@ -171,7 +172,7 @@ serve(async (req) => {
 
                 if (!authError && authUsers?.users && authUsers.users.length > 0) {
                   const userId = authUsers.users[0].id;
-                  console.log(`Found user with email ${email} directly in auth.users, ID: ${userId}`);
+                  debugLog(`Found user with email ${email} directly in auth.users, ID: ${userId}`);
                   
                   // Process as a regular user payment
                   await processUserPayment(supabaseClient, userId, payload);
@@ -192,7 +193,7 @@ serve(async (req) => {
                     details: { userId, email }
                   };
                 } else {
-                  console.log(`No user found with email ${email} in auth.users`);
+                  debugLog(`No user found with email ${email} in auth.users`);
                   processingResult = {
                     success: false,
                     message: 'User not found by email via any method',
@@ -213,7 +214,7 @@ serve(async (req) => {
           // No ReturnValue, try to use email
           if (UIValues && UIValues.CardOwnerEmail) {
             const email = UIValues.CardOwnerEmail;
-            console.log('No ReturnValue. Attempting to find user by email:', email);
+            debugLog('No ReturnValue. Attempting to find user by email:', email);
             
             // Call get-user-by-email function to look up user
             const { data: userData, error: userError } = await supabaseClient.functions.invoke('get-user-by-email', {
@@ -222,7 +223,7 @@ serve(async (req) => {
 
             if (!userError && userData?.user?.id) {
               const userId = userData.user.id;
-              console.log(`Found user with email ${email}, ID: ${userId}`);
+              debugLog(`Found user with email ${email}, ID: ${userId}`);
               
               // Process as a regular user payment
               await processUserPayment(supabaseClient, userId, payload);
@@ -243,7 +244,7 @@ serve(async (req) => {
                 details: { userId, email }
               };
             } else {
-              console.log(`No user found with email ${email} using get-user-by-email function`);
+              debugLog(`No user found with email ${email} using get-user-by-email function`);
               
               // Direct lookup in auth.users table as fallback
               const { data: authUsers, error: authError } = await supabaseClient.auth.admin.listUsers({
@@ -258,7 +259,7 @@ serve(async (req) => {
 
               if (!authError && authUsers?.users && authUsers.users.length > 0) {
                 const userId = authUsers.users[0].id;
-                console.log(`Found user with email ${email} directly in auth.users, ID: ${userId}`);
+                debugLog(`Found user with email ${email} directly in auth.users, ID: ${userId}`);
                 
                 // Process as a regular user payment
                 await processUserPayment(supabaseClient, userId, payload);
@@ -279,7 +280,7 @@ serve(async (req) => {
                   details: { userId, email }
                 };
               } else {
-                console.log(`No user found with email ${email} in auth.users`);
+                debugLog(`No user found with email ${email} in auth.users`);
                 processingResult = {
                   success: false,
                   message: 'User not found by email via any method',
@@ -357,7 +358,7 @@ serve(async (req) => {
 
 // Process payment for registered user
 async function processUserPayment(supabase: any, userId: string, payload: any) {
-  console.log(`Processing payment for user: ${userId}`);
+  debugLog(`Processing payment for user: ${userId}`);
   
   // Extract token information if available
   const tokenInfo = payload.TokenInfo;
@@ -401,7 +402,7 @@ async function processUserPayment(supabase: any, userId: string, payload: any) {
 
   // If we have token info, store it in payment_tokens table
   if (tokenInfo && tokenInfo.Token) {
-    console.log(`Storing token for user: ${userId}, token: ${tokenInfo.Token}`);
+    debugLog(`Storing token for user: ${userId}, token: ${tokenInfo.Token}`);
     
     try {
       // Ensure all required fields are present and valid
@@ -433,7 +434,7 @@ async function processUserPayment(supabase: any, userId: string, payload: any) {
         console.error('Error storing token:', tokenError);
         throw new Error(`Failed to store token: ${tokenError.message}`);
       } else {
-        console.log('Token stored successfully');
+        debugLog('Token stored successfully');
       }
     } catch (tokenSaveError) {
       console.error('Error in token storage:', tokenSaveError);
@@ -479,7 +480,7 @@ async function processUserPayment(supabase: any, userId: string, payload: any) {
 
 // Process payment for temporary registration
 async function processRegistrationPayment(supabase: any, regId: string, payload: any) {
-  console.log(`Processing payment for registration: ${regId}`);
+  debugLog(`Processing payment for registration: ${regId}`);
   
   // Extract the actual ID from the temp_reg_ prefix
   const actualId = regId.startsWith('temp_reg_') ? regId.substring(9) : regId;
@@ -542,7 +543,7 @@ async function processRegistrationPayment(supabase: any, regId: string, payload:
       if (!searchError && regData && regData.length > 0) {
         // Found a matching registration
         const matchedRegId = regData[0].id;
-        console.log(`Found matching registration ID: ${matchedRegId}`);
+        debugLog(`Found matching registration ID: ${matchedRegId}`);
         
         const regDataEntry = regData[0];
 
@@ -589,7 +590,7 @@ async function processRegistrationPayment(supabase: any, regId: string, payload:
       } else {
         // Still can't find any matching registration, create a new one
         if (payload.UIValues && payload.UIValues.CardOwnerEmail) {
-          console.log('Creating new temp registration with email:', payload.UIValues.CardOwnerEmail);
+          debugLog('Creating new temp registration with email:', payload.UIValues.CardOwnerEmail);
           
           const { error: insertError } = await supabase
             .from('temp_registration_data')

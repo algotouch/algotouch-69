@@ -1,3 +1,4 @@
+import { debugLog } from '@/lib/logger';
 
 /**
  * Simplified module loader utility with clean error handling
@@ -17,7 +18,7 @@ export const loadModuleWithRetry = async <T>(
   
   const tryLoad = async (): Promise<T> => {
     try {
-      console.log(`Attempting to load module: ${moduleName} (attempt ${attempts + 1}/${MAX_RETRIES})`);
+      debugLog(`Attempting to load module: ${moduleName} (attempt ${attempts + 1}/${MAX_RETRIES})`);
       return await importFn();
     } catch (error) {
       attempts++;

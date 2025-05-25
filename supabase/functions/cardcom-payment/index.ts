@@ -1,3 +1,4 @@
+import { debugLog } from '../_shared/logger.ts';
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.14.0";
 import { getPlanAmount } from "../_shared/planAmounts.ts";
@@ -29,9 +30,9 @@ const API_CONFIG = {
 };
 
 // Log configuration for debugging (without exposing sensitive values)
-console.log('CardCom API configuration initialized with terminal:', 
+debugLog('CardCom API configuration initialized with terminal:', 
   API_CONFIG.TERMINAL ? '[terminal configured]' : '[terminal missing]');
-console.log('CardCom API credentials status:',
+debugLog('CardCom API credentials status:',
   (API_CONFIG.USERNAME && API_CONFIG.PASSWORD) ? '[credentials configured]' : '[credentials missing]');
 
 // CardCom operation types
@@ -101,7 +102,7 @@ async function createPaymentSession(params: any) {
       }
     };
 
-    console.log('Creating CardCom payment session:', {
+    debugLog('Creating CardCom payment session:', {
       planId,
       amount,
       operation: operationString,
@@ -310,7 +311,7 @@ serve(async (req) => {
     try {
       const { data } = await supabaseClient.auth.getUser();
       user = data.user;
-      console.log('Authenticated user:', user?.email);
+      debugLog('Authenticated user:', user?.email);
     } catch (authError) {
       console.error('Auth error:', authError);
       // Continue without user - might be registration flow
@@ -329,7 +330,7 @@ serve(async (req) => {
         registrationData 
       } = await req.json();
       
-      console.log('Creating payment session for:', { 
+      debugLog('Creating payment session for:', { 
         planId, 
         userId: userId || (user?.id || 'anonymous'), 
         email: email || user?.email || 'anonymous',
@@ -356,7 +357,7 @@ serve(async (req) => {
             console.error('Error storing temp registration:', tempError);
             throw new Error('Failed to store registration data: ' + tempError.message);
           } else {
-            console.log('Stored temp registration data with ID:', tempRegistrationId);
+            debugLog('Stored temp registration data with ID:', tempRegistrationId);
           }
         } catch (storageError: any) {
           console.error('Error in temp registration storage:', storageError);
@@ -431,7 +432,7 @@ serve(async (req) => {
         );
       }
       
-      console.log('Retrieving registration data for ID:', registrationId);
+      debugLog('Retrieving registration data for ID:', registrationId);
       
       const { data, error } = await supabaseClient
         .from('temp_registration_data')
@@ -579,7 +580,7 @@ serve(async (req) => {
       try {
         // Parse the webhook payload
         const payload = await req.json();
-        console.log('Payment notification received:', payload);
+        debugLog('Payment notification received:', payload);
         
         // Store the webhook notification in the database for processing
         const { error } = await supabaseClient
@@ -604,7 +605,7 @@ serve(async (req) => {
             .single();
             
           if (regData?.registration_data) {
-            console.log('Found registration data for webhook notification');
+            debugLog('Found registration data for webhook notification');
             
             // Extract token info if available
             if (payload.TokenInfo?.Token) {

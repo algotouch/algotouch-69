@@ -1,3 +1,4 @@
+import { debugLog } from '@/lib/logger';
 
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
@@ -13,7 +14,7 @@ const Courses = ({ onCourseClick, selectedCourseId }: CoursesComponentProps) => 
   const navigate = useNavigate();
 
   const handleCourseClick = (courseId: string) => {
-    console.log("קורס נבחר:", courseId);
+    debugLog("קורס נבחר:", courseId);
     if (onCourseClick) {
       onCourseClick(courseId);
     }

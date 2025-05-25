@@ -1,3 +1,4 @@
+import { debugLog } from '@/lib/logger';
 
 import React from 'react';
 import { cn } from '@/lib/utils';
@@ -73,7 +74,7 @@ const CalendarGrid = ({
   currentYear = new Date().getFullYear()
 }: CalendarGridProps) => {
   
-  console.log("CalendarGrid render with month:", currentMonthIndex, "year:", currentYear);
+  debugLog("CalendarGrid render with month:", currentMonthIndex, "year:", currentYear);
   
   return (
     <div className="w-full mt-2">

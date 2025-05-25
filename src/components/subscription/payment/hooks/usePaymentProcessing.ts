@@ -1,3 +1,4 @@
+import { debugLog } from '@/lib/logger';
 
 import { useState } from 'react';
 import { toast } from 'sonner';
@@ -60,7 +61,7 @@ export const usePaymentProcessing = () => {
       }
       
       if (data.registrationData) {
-        console.log('Retrieved registration data:', {
+        debugLog('Retrieved registration data:', {
           email: data.registrationData.email,
           hasPassword: !!data.registrationData.password
         });

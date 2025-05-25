@@ -1,3 +1,4 @@
+import { debugLog } from '@/lib/logger';
 import React, { useState, useEffect } from 'react';
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/components/ui/use-toast";
@@ -13,7 +14,7 @@ type StockData = {
 // Function to fetch real stock data from our Supabase Edge Function
 export async function fetchStockIndices(): Promise<StockData[]> {
   try {
-    console.log('Fetching stock data from edge function...');
+    debugLog('Fetching stock data from edge function...');
     const { data, error } = await supabase.functions.invoke('stock-data');
     
     if (error) {
@@ -21,7 +22,7 @@ export async function fetchStockIndices(): Promise<StockData[]> {
       throw error;
     }
     
-    console.log('Successfully fetched stock data:', data);
+    debugLog('Successfully fetched stock data:', data);
     return data || [];
   } catch (error) {
     console.error('Error fetching stock data:', error);

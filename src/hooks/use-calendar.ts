@@ -1,3 +1,4 @@
+import { debugLog } from '@/lib/logger';
 
 import { useState, useEffect } from 'react';
 import { useTradingDataStore } from '@/stores/trading-data-store';
@@ -33,22 +34,22 @@ export const useCalendar = () => {
   
   // For debugging - log data on mount and when values change
   useEffect(() => {
-    console.log("useCalendar: Initial state", { 
+    debugLog("useCalendar: Initial state", { 
       globalTradesCount: globalTrades.length,
       tradesByDayCount: Object.keys(tradesByDay).length,
       viewMode
     });
     
     if (globalTrades.length > 0) {
-      console.log("useCalendar: Sample trades:", globalTrades.slice(0, 2));
+      debugLog("useCalendar: Sample trades:", globalTrades.slice(0, 2));
     }
     
     if (Object.keys(tradesByDay).length > 0) {
-      console.log("useCalendar: Days with trades:", Object.keys(tradesByDay));
+      debugLog("useCalendar: Days with trades:", Object.keys(tradesByDay));
       
       // Check data in a sample day
       const sampleDay = Object.keys(tradesByDay)[0];
-      console.log(`Sample day ${sampleDay} has:`, 
+      debugLog(`Sample day ${sampleDay} has:`, 
         tradesByDay[sampleDay].length, 
         "trades with total profit:", 
         tradesByDay[sampleDay].reduce((sum, t) => sum + (t.Net || 0), 0)
@@ -59,7 +60,7 @@ export const useCalendar = () => {
   // Ensure tradesByDay is updated whenever globalTrades changes
   useEffect(() => {
     if (globalTrades.length > 0) {
-      console.log("useCalendar: Ensuring tradesByDay is updated with globalTrades");
+      debugLog("useCalendar: Ensuring tradesByDay is updated with globalTrades");
       updateTradesByDay();
     }
   }, [globalTrades, updateTradesByDay]);
@@ -67,7 +68,7 @@ export const useCalendar = () => {
   // Show toast when trades are loaded - only once
   useEffect(() => {
     if (globalTrades.length > 0 && !hasShownToast) {
-      console.log("Calendar: Found trades data:", 
+      debugLog("Calendar: Found trades data:", 
         `Global trades: ${globalTrades.length}`,
         `Days with trades: ${Object.keys(tradesByDay).length}`
       );
@@ -84,7 +85,7 @@ export const useCalendar = () => {
   // Generate trade days for the recent activity section using real data
   const generateTradeDays = (): TradeDay[] => {
     if (globalTrades.length === 0) {
-      console.log("useCalendar: No trades data available for generating trade days");
+      debugLog("useCalendar: No trades data available for generating trade days");
       return [];
     }
     
@@ -117,7 +118,7 @@ export const useCalendar = () => {
     });
     
     // Log detailed information
-    console.log("useCalendar: Generated", result.length, "trade days for recent activity");
+    debugLog("useCalendar: Generated", result.length, "trade days for recent activity");
     
     // Sort by date descending and take the 5 most recent
     return result

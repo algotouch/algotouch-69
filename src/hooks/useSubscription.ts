@@ -1,3 +1,4 @@
+import { debugLog } from '@/lib/logger';
 import { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '@/contexts/auth';
 import { toast } from 'sonner';
@@ -84,7 +85,7 @@ export const useSubscription = (): UseSubscriptionReturn => {
         });
         
         if (userRelatedWebhooks.length > 0) {
-          console.log('Found unprocessed webhook(s) for user email:', user.email, userRelatedWebhooks.length);
+          debugLog('Found unprocessed webhook(s) for user email:', user.email, userRelatedWebhooks.length);
           return true;
         }
       }
@@ -120,7 +121,7 @@ export const useSubscription = (): UseSubscriptionReturn => {
             });
             
             if (matchingWebhooks.length > 0) {
-              console.log('Found unprocessed webhook by token:', payment.token);
+              debugLog('Found unprocessed webhook by token:', payment.token);
               return true;
             }
           }
@@ -140,7 +141,7 @@ export const useSubscription = (): UseSubscriptionReturn => {
         console.error('Error checking payment tokens:', recurringError);
       } else {
         if (recurringPayments && recurringPayments.length === 0 && subscription) {
-          console.log('User has subscription but no valid payment token');
+          debugLog('User has subscription but no valid payment token');
           // This indicates a potential inconsistency that might need fixing
           return true;
         }
@@ -150,7 +151,7 @@ export const useSubscription = (): UseSubscriptionReturn => {
           const recurringToken = recurringPayments[0].token;
           
           if (subscription.token !== recurringToken) {
-            console.log('Token mismatch between subscription and payment_tokens');
+            debugLog('Token mismatch between subscription and payment_tokens');
             // There's an inconsistency that needs to be fixed
             return true;
           }
@@ -198,7 +199,7 @@ export const useSubscription = (): UseSubscriptionReturn => {
     if (user?.id && user?.email) {
       checkForUnprocessedPayments().then(hasUnprocessed => {
         if (hasUnprocessed && !subscription) {
-          console.log('Found unprocessed payments, user might need to sync subscription data');
+          debugLog('Found unprocessed payments, user might need to sync subscription data');
         }
       }).catch(console.error);
     }

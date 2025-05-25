@@ -1,3 +1,4 @@
+import { debugLog } from '@/lib/logger';
 
 import { supabase } from '@/lib/supabase-client';
 import { ContractSignatureData } from '@/types/payment';
@@ -14,7 +15,7 @@ export async function processSignedContract(
   contractData: ContractSignatureData
 ): Promise<boolean> {
   try {
-    console.log('Processing signed contract for user:', { userId, planId, email });
+    debugLog('Processing signed contract for user:', { userId, planId, email });
     
     // Validation
     if (!userId || !planId || !email || !contractData) {
@@ -55,7 +56,7 @@ export async function processSignedContract(
         throw error;
       }
 
-      console.log('Contract processed successfully by izidoc-sign:', data);
+      debugLog('Contract processed successfully by izidoc-sign:', data);
       toast.success('ההסכם נחתם ונשמר בהצלחה!');
       return true;
     } catch (functionError) {

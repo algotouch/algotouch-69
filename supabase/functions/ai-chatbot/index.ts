@@ -1,3 +1,4 @@
+import { debugLog } from '../_shared/logger.ts';
 
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
 import "https://deno.land/x/xhr@0.1.0/mod.ts"
@@ -148,10 +149,10 @@ serve(async (req) => {
         let thread
         if (threadId) {
           thread = { id: threadId }
-          console.log("Using existing thread:", thread.id)
+          debugLog("Using existing thread:", thread.id)
         } else {
           thread = await openai.beta.threads.create()
-          console.log("Created new thread:", thread.id)
+          debugLog("Created new thread:", thread.id)
         }
 
         // Add user message to thread
@@ -195,13 +196,13 @@ serve(async (req) => {
 
         // If we have tool outputs to submit for a run in progress
         if (toolOutputs && runId) {
-          console.log("Submitting tool outputs for run:", runId)
+          debugLog("Submitting tool outputs for run:", runId)
           const submissionResponse = await openai.beta.threads.runs.submitToolOutputs(
             thread.id,
             runId,
             { tool_outputs: toolOutputs }
           )
-          console.log("Tool outputs submitted, run continuing")
+          debugLog("Tool outputs submitted, run continuing")
           
           // We'll return the updated run status
           return new Response(
@@ -219,7 +220,7 @@ serve(async (req) => {
 
         // Create new run
         const run = await openai.beta.threads.runs.create(thread.id, runOptions)
-        console.log(`Created new run: ${run.id} with status: ${run.status}`)
+        debugLog(`Created new run: ${run.id} with status: ${run.status}`)
 
         // Poll for run completion with better error handling and timeouts
         let runStatus = await openai.beta.threads.runs.retrieve(thread.id, run.id)
@@ -235,7 +236,7 @@ serve(async (req) => {
           
           try {
             runStatus = await openai.beta.threads.runs.retrieve(thread.id, run.id)
-            console.log(`Run status: ${runStatus.status}, attempt: ${attempts + 1}/${maxAttempts}`)
+            debugLog(`Run status: ${runStatus.status}, attempt: ${attempts + 1}/${maxAttempts}`)
           } catch (retrieveError) {
             console.error(`Error retrieving run status: ${retrieveError.message}`)
             
@@ -258,7 +259,7 @@ serve(async (req) => {
 
         if (runStatus.status === 'requires_action') {
           // The run needs the client to execute functions and return the outputs
-          console.log("Run requires action:", JSON.stringify(runStatus.required_action))
+          debugLog("Run requires action:", JSON.stringify(runStatus.required_action))
           
           // Return the required actions to the client
           return new Response(

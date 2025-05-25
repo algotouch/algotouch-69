@@ -1,3 +1,4 @@
+import { debugLog } from '../_shared/logger.ts';
 
 import "https://deno.land/x/xhr@0.1.0/mod.ts";
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
@@ -48,7 +49,7 @@ serve(async (req) => {
     `;
 
     // Call OpenAI API
-    console.log('Calling OpenAI with prompt:', prompt);
+    debugLog('Calling OpenAI with prompt:', prompt);
     
     const response = await fetch('https://api.openai.com/v1/chat/completions', {
       method: 'POST',
@@ -68,7 +69,7 @@ serve(async (req) => {
     });
 
     const data = await response.json();
-    console.log('OpenAI response:', data);
+    debugLog('OpenAI response:', data);
     
     if (!data.choices || !data.choices[0]) {
       throw new Error('No response from OpenAI');

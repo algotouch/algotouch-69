@@ -1,3 +1,4 @@
+import { debugLog } from '../_shared/logger.ts';
 
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.14.0";
@@ -60,9 +61,9 @@ async function logPaymentEvent(
         source: 'edge-function'
       });
   } catch (error) {
-    // Fallback to console logging if database logging fails
+    // Fallback to debugLogging if database logging fails
     console.error('Error logging to database:', error);
-    console.log(`[${level}] [${context}] ${message}`, data);
+    debugLog(`[${level}] [${context}] ${message}`, data);
   }
 }
 

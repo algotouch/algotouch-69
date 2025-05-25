@@ -1,3 +1,4 @@
+import { debugLog } from '../_shared/logger.ts';
 
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { corsHeaders } from "../_shared/cors.ts";
@@ -87,7 +88,7 @@ serve(async (req) => {
       }
     };
 
-    console.log("Sending request to Cardcom:", JSON.stringify(cardcomRequestBody));
+    debugLog("Sending request to Cardcom:", JSON.stringify(cardcomRequestBody));
 
     // Call Cardcom API to create low profile page (updated to v11)
     const response = await fetch("https://secure.cardcom.solutions/api/v11/LowProfile/Create", {
@@ -101,7 +102,7 @@ serve(async (req) => {
     // Parse the response
     const data = await response.json();
     
-    console.log("Received response from Cardcom:", JSON.stringify(data));
+    debugLog("Received response from Cardcom:", JSON.stringify(data));
     
     // Return the response
     return new Response(

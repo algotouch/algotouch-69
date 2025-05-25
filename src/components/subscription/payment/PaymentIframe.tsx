@@ -1,3 +1,4 @@
+import { debugLog } from '@/lib/logger';
 
 import React, { useState, useEffect } from 'react';
 import { CardContent } from '@/components/ui/card';
@@ -46,11 +47,11 @@ const PaymentIframe: React.FC<PaymentIframeProps> = ({
         return;
       }
 
-      console.log('Received message from iframe:', event.data);
+      debugLog('Received message from iframe:', event.data);
 
       if (event.data?.type === 'cardcom-paid') {
         // Payment successful
-        console.log('Payment successful:', event.data.details);
+        debugLog('Payment successful:', event.data.details);
         toast.success('התשלום התקבל בהצלחה!');
 
         if (onSuccess) {

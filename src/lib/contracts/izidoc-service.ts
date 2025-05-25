@@ -1,3 +1,4 @@
+import { debugLog } from '@/lib/logger';
 
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
@@ -33,7 +34,7 @@ export async function callIzidocSignFunction(
   contractData: ContractData
 ): Promise<{ success: boolean; data?: any; error?: any }> {
   try {
-    console.log('Calling izidoc-sign function directly:', {
+    debugLog('Calling izidoc-sign function directly:', {
       userId, 
       planId, 
       email, 
@@ -66,7 +67,7 @@ export async function callIzidocSignFunction(
       return { success: false, error };
     }
 
-    console.log('Contract processed successfully by izidoc-sign:', data);
+    debugLog('Contract processed successfully by izidoc-sign:', data);
     return { success: true, data };
   } catch (error) {
     console.error('Exception calling izidoc-sign function:', error);

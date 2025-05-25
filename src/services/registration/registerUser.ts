@@ -1,3 +1,4 @@
+import { debugLog } from '@/lib/logger';
 
 import { supabase } from '@/lib/supabase-client';
 import { TokenData, RegistrationData, ContractSignatureData } from '@/types/payment';
@@ -35,7 +36,7 @@ export const registerUser = async ({
       throw new Error('חסרים פרטי משתמש');
     }
 
-    console.log('Starting user registration:', {
+    debugLog('Starting user registration:', {
       email: registrationData.email,
       firstName: registrationData.userData.firstName,
       planId: registrationData.planId,
@@ -64,7 +65,7 @@ export const registerUser = async ({
       
       if (!error && data) {
         tempRegistrationId = data.id;
-        console.log('Created temporary registration record:', tempRegistrationId);
+        debugLog('Created temporary registration record:', tempRegistrationId);
       }
     } catch (err) {
       // Non-critical error, continue with registration
@@ -95,7 +96,7 @@ export const registerUser = async ({
       throw new Error('יצירת משתמש נכשלה');
     }
 
-    console.log('User created successfully:', userData.user.id);
+    debugLog('User created successfully:', userData.user.id);
 
     // Add a delay to ensure the user record is propagated
     await new Promise(resolve => setTimeout(resolve, 1000));
@@ -134,7 +135,7 @@ export const registerUser = async ({
       throw subscriptionError;
     }
     
-    console.log('Subscription created successfully');
+    debugLog('Subscription created successfully');
     
     // Create payment token record for future use
     if (tokenData && tokenData.token) {
@@ -159,7 +160,7 @@ export const registerUser = async ({
           updated_at: new Date().toISOString()
         });
           
-        console.log('Payment token stored successfully');
+        debugLog('Payment token stored successfully');
       } catch (tokenStoreError) {
         console.error('Exception storing token:', tokenStoreError);
         // Continue with registration even if token storage fails
@@ -202,7 +203,7 @@ export const registerUser = async ({
             ipAddress = ipData.ip;
           }
         } catch (e) {
-          console.log('Could not get IP address, continuing without it');
+          debugLog('Could not get IP address, continuing without it');
         }
         
         // Store the contract signature with simplified browser_info
@@ -236,7 +237,7 @@ export const registerUser = async ({
           console.error('Error storing contract signature:', signatureError);
           // We don't throw here, as this is not critical to the registration process
         } else {
-          console.log('Contract signature stored successfully');
+          debugLog('Contract signature stored successfully');
         }
       } catch (signatureError) {
         console.error('Exception storing signature:', signatureError);

@@ -1,3 +1,4 @@
+import { debugLog } from '@/lib/logger';
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '@/contexts/auth';
 import { getContractById, verifyContractSignature } from '@/lib/contracts/contract-service';
@@ -37,7 +38,7 @@ const ContractViewer: React.FC<ContractViewerProps> = ({
       
       setLoading(true);
       try {
-        console.log('Fetching contract:', { userId, externalContractId });
+        debugLog('Fetching contract:', { userId, externalContractId });
         
         // If a specific contract ID is provided, fetch that contract
         if (externalContractId) {
@@ -57,7 +58,7 @@ const ContractViewer: React.FC<ContractViewerProps> = ({
             return;
           }
           
-          console.log('Contract found:', { id: contract.id, hasHtml: !!contract.contract_html });
+          debugLog('Contract found:', { id: contract.id, hasHtml: !!contract.contract_html });
           setContractData(contract);
           setContractHtml(contract.contract_html);
           setLoading(false);
@@ -66,7 +67,7 @@ const ContractViewer: React.FC<ContractViewerProps> = ({
         
         // Otherwise, find the latest contract for this user
         const { signed, contractId, signedAt } = await verifyContractSignature(userId);
-        console.log('Contract verification result:', { signed, contractId, signedAt });
+        debugLog('Contract verification result:', { signed, contractId, signedAt });
         
         if (!signed || !contractId) {
           setError('לא נמצא הסכם חתום');
@@ -91,7 +92,7 @@ const ContractViewer: React.FC<ContractViewerProps> = ({
           return;
         }
         
-        console.log('Contract loaded successfully');
+        debugLog('Contract loaded successfully');
         setContractData(contract);
         setContractHtml(contract.contract_html);
       } catch (err) {

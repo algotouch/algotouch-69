@@ -1,3 +1,4 @@
+import { debugLog } from '@/lib/logger';
 
 import { supabase } from '@/integrations/supabase/client';
 import { Json } from '@/integrations/supabase/types';
@@ -114,7 +115,7 @@ export const registerUser = async (
             ipAddress = ipData.ip;
           }
         } catch (e) {
-          console.log('Could not get IP address, continuing without it');
+          debugLog('Could not get IP address, continuing without it');
         }
         
         // Store the contract signature
@@ -144,7 +145,7 @@ export const registerUser = async (
           console.error('Error storing contract signature:', signatureError);
           // We don't throw here, as this is not critical to the registration process
         } else {
-          console.log('Contract signature stored successfully');
+          debugLog('Contract signature stored successfully');
         }
       } catch (signatureError) {
         console.error('Exception storing signature:', signatureError);

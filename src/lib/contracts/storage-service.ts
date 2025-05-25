@@ -1,3 +1,4 @@
+import { debugLog } from '@/lib/logger';
 
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
@@ -13,7 +14,7 @@ export async function callIzidocSignFunction(
   contractData: any
 ): Promise<{ success: boolean; data?: any; error?: any }> {
   try {
-    console.log('Calling izidoc-sign edge function:', {
+    debugLog('Calling izidoc-sign edge function:', {
       userId, 
       planId, 
       email, 
@@ -46,7 +47,7 @@ export async function callIzidocSignFunction(
       return { success: false, error };
     }
 
-    console.log('Contract processed successfully by izidoc-sign:', data);
+    debugLog('Contract processed successfully by izidoc-sign:', data);
     return { success: true, data };
   } catch (error) {
     console.error('Exception calling izidoc-sign function:', error);
@@ -65,7 +66,7 @@ export async function saveContractToDatabase(
   contractData: any
 ): Promise<{ success: boolean; data?: any; error?: any }> {
   try {
-    console.log('Saving contract for user:', userId, 'plan:', planId);
+    debugLog('Saving contract for user:', userId, 'plan:', planId);
     
     // Validate inputs
     if (!userId || !contractData?.contractHtml || !contractData?.signature) {
@@ -80,7 +81,7 @@ export async function saveContractToDatabase(
     const uploadResult = await uploadContractToStorage(userId, contractData.contractHtml, contractId);
     
     const pdfUrl = uploadResult.success ? uploadResult.url : null;
-    console.log(uploadResult.success ? 'Contract uploaded to storage' : 'Failed to upload contract to storage');
+    debugLog(uploadResult.success ? 'Contract uploaded to storage' : 'Failed to upload contract to storage');
     
     // Always send email with contract to support, as a backup
     try {
@@ -120,7 +121,7 @@ export async function saveContractToDatabase(
       return { success: false, error };
     }
 
-    console.log('Contract signature saved successfully:', data);
+    debugLog('Contract signature saved successfully:', data);
     
     // Update user metadata with link to the contract
     try {
@@ -154,7 +155,7 @@ async function sendContractByEmail(
   contractId: string
 ): Promise<boolean> {
   try {
-    console.log(`Sending contract backup email for user: ${userId}, contract: ${contractId}`);
+    debugLog(`Sending contract backup email for user: ${userId}, contract: ${contractId}`);
     
     // Prepare email content
     const subject = `[BACKUP] Contract signed - ${fullName}`;
@@ -194,7 +195,7 @@ async function sendContractByEmail(
       return false;
     }
     
-    console.log('Contract backup email sent successfully');
+    debugLog('Contract backup email sent successfully');
     return true;
   } catch (error) {
     console.error('Exception sending contract backup email:', error);
@@ -211,7 +212,7 @@ export async function uploadContractToStorage(
   contractId: string
 ): Promise<{ success: boolean; url?: string; error?: any }> {
   try {
-    console.log(`Uploading contract HTML to storage for user: ${userId}, contract: ${contractId}`);
+    debugLog(`Uploading contract HTML to storage for user: ${userId}, contract: ${contractId}`);
     
     // Check if the contracts bucket exists and create it if needed
     try {
@@ -219,7 +220,7 @@ export async function uploadContractToStorage(
       const contractsBucketExists = buckets?.some(bucket => bucket.name === 'contracts');
       
       if (!contractsBucketExists) {
-        console.log('Contracts bucket does not exist, attempting to create it');
+        debugLog('Contracts bucket does not exist, attempting to create it');
         const { error: createError } = await supabase.storage.createBucket('contracts', {
           public: false,
           fileSizeLimit: 10485760, // 10MB
@@ -230,7 +231,7 @@ export async function uploadContractToStorage(
           console.error('Error creating contracts bucket:', createError);
           return { success: false, error: createError };
         }
-        console.log('Created contracts bucket successfully');
+        debugLog('Created contracts bucket successfully');
       }
     } catch (bucketCheckError) {
       console.error('Error checking for contracts bucket:', bucketCheckError);
@@ -258,7 +259,7 @@ export async function uploadContractToStorage(
       return { success: false, error };
     }
     
-    console.log('Contract uploaded successfully to storage:', data?.path);
+    debugLog('Contract uploaded successfully to storage:', data?.path);
     
     // Create a URL for accessing the contract
     const { data: urlData } = await supabase
@@ -376,7 +377,7 @@ export async function verifyContractSignature(userId: string): Promise<{ signed:
  */
 export async function getContractById(contractId: string): Promise<{ success: boolean; contract?: any; error?: any }> {
   try {
-    console.log('Fetching contract with ID:', contractId);
+    debugLog('Fetching contract with ID:', contractId);
     const { data, error } = await supabase
       .from('contract_signatures')
       .select('*')
@@ -388,7 +389,7 @@ export async function getContractById(contractId: string): Promise<{ success: bo
       return { success: false, error };
     }
     
-    console.log('Contract retrieved successfully');
+    debugLog('Contract retrieved successfully');
     return { success: true, contract: data };
   } catch (error) {
     console.error('Exception retrieving contract:', error);

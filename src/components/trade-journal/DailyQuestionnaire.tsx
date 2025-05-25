@@ -1,3 +1,4 @@
+import { debugLog } from '@/lib/logger';
 
 import React, { useState } from 'react';
 import { z } from 'zod';
@@ -131,8 +132,8 @@ const DailyQuestionnaire: React.FC<DailyQuestionnaireProps> = ({ onSubmit }) => 
       reflection: data.dailyReflection
     };
     
-    console.log('Form values:', data);
-    console.log('Form data:', formattedData);
+    debugLog('Form values:', data);
+    debugLog('Form data:', formattedData);
     
     onSubmit(formattedData);
   };

@@ -1,3 +1,4 @@
+import { debugLog } from '@/lib/logger';
 
 import React, { useState } from 'react';
 import { Card } from '@/components/ui/card';
@@ -39,7 +40,7 @@ const PaymentSection: React.FC<PaymentSectionProps> = ({
 
   // Handle payment success
   const handlePaymentSuccess = (paymentData: any) => {
-    console.log('Payment successful in parent component:', paymentData);
+    debugLog('Payment successful in parent component:', paymentData);
     // We'll store the payment data in sessionStorage for later validation
     if (paymentData?.lowProfileId) {
       sessionStorage.setItem('payment_success_data', JSON.stringify({

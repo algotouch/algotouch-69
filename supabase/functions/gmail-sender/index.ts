@@ -1,3 +1,4 @@
+import { debugLog } from '../_shared/logger.ts';
 
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 
@@ -29,7 +30,7 @@ serve(async (req) => {
   }
 
   try {
-    console.log("--- GMAIL SENDER FUNCTION CALLED ---");
+    debugLog("--- GMAIL SENDER FUNCTION CALLED ---");
     
     // Get Gmail API configuration from environment variables
     const gmail_client_id = Deno.env.get("GMAIL_CLIENT_ID");
@@ -38,11 +39,11 @@ serve(async (req) => {
     const gmail_from = Deno.env.get("GMAIL_FROM") || "noreply@algotouch.co.il";
     
     // Log Gmail configuration (without sensitive details)
-    console.log("Gmail Configuration:");
-    console.log(`Client ID: ${gmail_client_id ? "Provided" : "MISSING"}`);
-    console.log(`Client Secret: ${gmail_client_secret ? "Provided" : "MISSING"}`);
-    console.log(`Refresh Token: ${gmail_refresh_token ? "Provided" : "MISSING"}`);
-    console.log(`From: ${gmail_from}`);
+    debugLog("Gmail Configuration:");
+    debugLog(`Client ID: ${gmail_client_id ? "Provided" : "MISSING"}`);
+    debugLog(`Client Secret: ${gmail_client_secret ? "Provided" : "MISSING"}`);
+    debugLog(`Refresh Token: ${gmail_refresh_token ? "Provided" : "MISSING"}`);
+    debugLog(`From: ${gmail_from}`);
     
     // Check if Gmail is properly configured
     if (!gmail_client_id || !gmail_client_secret || !gmail_refresh_token) {
@@ -91,7 +92,7 @@ serve(async (req) => {
       );
     }
     
-    console.log("Email request received:", {
+    debugLog("Email request received:", {
       to: emailRequest.to,
       subject: emailRequest.subject,
       hasAttachments: !!emailRequest.attachmentData?.length
@@ -120,7 +121,7 @@ serve(async (req) => {
     }
     
     // Get an access token using the refresh token
-    console.log("Getting Gmail access token");
+    debugLog("Getting Gmail access token");
     let accessToken;
     try {
       const tokenResponse = await fetch("https://oauth2.googleapis.com/token", {
@@ -148,7 +149,7 @@ serve(async (req) => {
         throw new Error("Access token not received from Google");
       }
       
-      console.log("Access token obtained successfully");
+      debugLog("Access token obtained successfully");
     } catch (tokenError) {
       console.error("Error getting access token:", tokenError);
       return new Response(
@@ -165,7 +166,7 @@ serve(async (req) => {
     }
     
     // Prepare email
-    console.log("Preparing email MIME message");
+    debugLog("Preparing email MIME message");
     let emailMessage: string;
     
     try {
@@ -226,7 +227,7 @@ serve(async (req) => {
     }
     
     // Send the email via Gmail API
-    console.log("Sending email via Gmail API");
+    debugLog("Sending email via Gmail API");
     try {
       const gmailResponse = await fetch("https://www.googleapis.com/gmail/v1/users/me/messages/send", {
         method: "POST",
@@ -245,7 +246,7 @@ serve(async (req) => {
       }
       
       const gmailData = await gmailResponse.json();
-      console.log("Email sent successfully via Gmail:", gmailData);
+      debugLog("Email sent successfully via Gmail:", gmailData);
       
       return new Response(
         JSON.stringify({

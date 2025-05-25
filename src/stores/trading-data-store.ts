@@ -1,3 +1,4 @@
+import { debugLog } from '@/lib/logger';
 
 import { create } from 'zustand';
 import { TradeRecord } from '@/lib/trade-analysis';
@@ -18,7 +19,7 @@ interface TradingDataState {
 export const useTradingDataStore = create<TradingDataState>((set, get) => ({
   globalTrades: [],
   setGlobalTrades: (trades) => {
-    console.log("Setting global trades:", trades.length);
+    debugLog("Setting global trades:", trades.length);
     
     // Process trades by day when setting global trades
     const tradesByDay: Record<string, TradeRecord[]> = {};
@@ -59,8 +60,8 @@ export const useTradingDataStore = create<TradingDataState>((set, get) => ({
       }
     });
     
-    console.log('Updated tradesByDay:', Object.keys(tradesByDay).length, 'days with trades');
-    console.log('Sample keys:', Object.keys(tradesByDay).slice(0, 5));
+    debugLog('Updated tradesByDay:', Object.keys(tradesByDay).length, 'days with trades');
+    debugLog('Sample keys:', Object.keys(tradesByDay).slice(0, 5));
     
     // Update state with all data in one operation to prevent infinite updates
     set({ 
@@ -73,7 +74,7 @@ export const useTradingDataStore = create<TradingDataState>((set, get) => ({
   tradesByDay: {},
   updateTradesByDay: () => {
     const trades = get().globalTrades;
-    console.log("Updating tradesByDay with", trades.length, "trades");
+    debugLog("Updating tradesByDay with", trades.length, "trades");
     
     const tradesByDay: Record<string, TradeRecord[]> = {};
     
@@ -113,8 +114,8 @@ export const useTradingDataStore = create<TradingDataState>((set, get) => ({
       }
     });
     
-    console.log('Updated tradesByDay:', Object.keys(tradesByDay).length, 'days with trades');
-    console.log('Sample keys:', Object.keys(tradesByDay).slice(0, 5));
+    debugLog('Updated tradesByDay:', Object.keys(tradesByDay).length, 'days with trades');
+    debugLog('Sample keys:', Object.keys(tradesByDay).slice(0, 5));
     
     set({ 
       tradesByDay,
@@ -125,7 +126,7 @@ export const useTradingDataStore = create<TradingDataState>((set, get) => ({
   lastUpdateTimestamp: 0,
   
   clearAllData: () => {
-    console.log("Clearing all trading data");
+    debugLog("Clearing all trading data");
     set({
       globalTrades: [],
       tradesByDay: {},

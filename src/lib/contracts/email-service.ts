@@ -1,3 +1,4 @@
+import { debugLog } from '@/lib/logger';
 
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
@@ -13,7 +14,7 @@ export async function sendContractConfirmationEmail(
   try {
     // In a real implementation, we would call an email service or Edge Function
     // For this example, we'll simulate success but log what would be sent
-    console.log('Sending contract confirmation email to:', {
+    debugLog('Sending contract confirmation email to:', {
       email,
       fullName,
       contractSignedAt

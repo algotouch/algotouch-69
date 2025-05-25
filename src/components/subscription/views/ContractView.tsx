@@ -1,3 +1,4 @@
+import { debugLog } from '@/lib/logger';
 
 import React from 'react';
 import ContractSection from '@/components/subscription/ContractSection';
@@ -39,7 +40,7 @@ const ContractView: React.FC<ContractViewProps> = ({
       return;
     }
     
-    console.log('Contract signing initiated', { 
+    debugLog('Contract signing initiated', { 
       hasUserId: !!user?.id, 
       isRegistering, 
       planId: selectedPlan 
@@ -62,7 +63,7 @@ const ContractView: React.FC<ContractViewProps> = ({
     // Generate temp contract ID for session storage if in registration flow
     if (isRegistering) {
       enhancedContractData.tempContractId = `temp_contract_${Date.now()}`;
-      console.log('Generated temp contract ID:', enhancedContractData.tempContractId);
+      debugLog('Generated temp contract ID:', enhancedContractData.tempContractId);
       
       try {
         // Parse registration data to update with contract info
@@ -70,16 +71,16 @@ const ContractView: React.FC<ContractViewProps> = ({
         parsedRegistrationData.contractDetails = enhancedContractData;
         parsedRegistrationData.planId = selectedPlan;
         sessionStorage.setItem('registration_data', JSON.stringify(parsedRegistrationData));
-        console.log('Updated registration data with contract details');
+        debugLog('Updated registration data with contract details');
       } catch (error) {
         console.error('Error updating registration data with contract:', error);
         // Continue with the flow even if this fails
       }
     } else {
-      console.log('User is authenticated, using regular contract flow');
+      debugLog('User is authenticated, using regular contract flow');
     }
     
-    console.log('Contract signed, sending data to parent component', { 
+    debugLog('Contract signed, sending data to parent component', { 
       planId: selectedPlan, 
       isRegistering, 
       hasUserId: !!user?.id,

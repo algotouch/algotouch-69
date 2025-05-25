@@ -1,3 +1,4 @@
+import { debugLog } from '@/lib/logger';
 
 import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
@@ -46,8 +47,8 @@ export const MonthCalendarSection = ({
   
   // Log for debugging
   useEffect(() => {
-    console.log(`MonthCalendarSection: Rendering ${currentMonth} ${currentYear}, monthIndex=${monthIndex}`);
-    console.log(`MonthCalendarSection: Total trade days in store: ${Object.keys(tradesData).length}`);
+    debugLog(`MonthCalendarSection: Rendering ${currentMonth} ${currentYear}, monthIndex=${monthIndex}`);
+    debugLog(`MonthCalendarSection: Total trade days in store: ${Object.keys(tradesData).length}`);
     
     // Filter trades only for this month and year
     const filteredDays = Object.keys(tradesData).filter(key => {
@@ -57,27 +58,27 @@ export const MonthCalendarSection = ({
              parseInt(parts[2]) === currentYear;
     });
     
-    console.log(`MonthCalendarSection: Filtered trade days for this month: ${filteredDays.length}`);
+    debugLog(`MonthCalendarSection: Filtered trade days for this month: ${filteredDays.length}`);
     
     if (filteredDays.length > 0) {
-      console.log("Sample days with trades:", filteredDays.slice(0, 3));
+      debugLog("Sample days with trades:", filteredDays.slice(0, 3));
       
       // Log details about the first few days
       filteredDays.slice(0, 3).forEach(day => {
         const trades = tradesData[day];
-        console.log(`Day ${day} has ${trades.length} trades with profit: $${
+        debugLog(`Day ${day} has ${trades.length} trades with profit: $${
           trades.reduce((sum, trade) => sum + (trade.Net || 0), 0).toFixed(2)
         }`);
       });
     } else {
-      console.log(`No trades found for ${currentMonth} ${currentYear}`);
+      debugLog(`No trades found for ${currentMonth} ${currentYear}`);
     }
   }, [tradesData, currentMonth, currentYear, monthIndex]);
   
   const handleDayClick = (day: number) => {
     // New format: Create a key with day-month-year
     const dayKey = `${day}-${monthIndex}-${currentYear}`;
-    console.log("Day clicked:", dayKey, "Has trades:", tradesData[dayKey]?.length || 0);
+    debugLog("Day clicked:", dayKey, "Has trades:", tradesData[dayKey]?.length || 0);
     
     // Set the selected day
     setSelectedDay(dayKey);

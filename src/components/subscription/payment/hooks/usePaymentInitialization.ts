@@ -1,3 +1,4 @@
+import { debugLog } from '@/lib/logger';
 
 import { useState, useEffect } from 'react';
 import { supabase } from '@/lib/supabase-client';
@@ -62,7 +63,7 @@ export const usePaymentInitialization = (
       const userIdNumber = userData?.idNumber || registrationData?.userData?.idNumber || '';
 
       // Log payment initialization parameters for debugging
-      console.log('Payment initialization parameters:', {
+      debugLog('Payment initialization parameters:', {
         plan: selectedPlan,
         fullName: userFullName,
         email: userEmail,
@@ -117,7 +118,7 @@ export const usePaymentInitialization = (
           localStorage.setItem('temp_registration_id', tempRegistrationId);
           
           // Also log important information to help with debugging
-          console.log('Payment initiated with:', {
+          debugLog('Payment initiated with:', {
             tempRegistrationId,
             planId: selectedPlan,
             operation: operationType,

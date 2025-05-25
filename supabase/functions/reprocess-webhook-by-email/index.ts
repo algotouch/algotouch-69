@@ -1,3 +1,4 @@
+import { debugLog } from '../_shared/logger.ts';
 
 // Follow this setup guide to integrate the Deno language server with your editor:
 // https://deno.land/manual/getting_started/setup_your_environment
@@ -46,7 +47,7 @@ serve(async (req) => {
       );
     }
 
-    console.log("Reprocessing webhook for:", { email, userId, lowProfileId, forceRefresh });
+    debugLog("Reprocessing webhook for:", { email, userId, lowProfileId, forceRefresh });
 
     // Step 1: Find the user if only email is provided
     let targetUserId = userId;
@@ -75,7 +76,7 @@ serve(async (req) => {
       targetUserId = userData.id;
     }
 
-    console.log("Found user ID:", targetUserId);
+    debugLog("Found user ID:", targetUserId);
 
     // Step 2: Log this repair attempt
     await supabase

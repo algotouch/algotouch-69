@@ -1,3 +1,4 @@
+import { debugLog } from '@/lib/logger';
 
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
@@ -29,7 +30,7 @@ const AuthLoadError: React.FC = () => {
       const keysToCheck = ['supabase.auth.token', 'sb-ndhakvhrrkczgylcmyoc-auth-token'];
       keysToCheck.forEach(key => {
         if (localStorage.getItem(key)) {
-          console.log(`Clearing ${key} from localStorage`);
+          debugLog(`Clearing ${key} from localStorage`);
           localStorage.removeItem(key);
         }
       });

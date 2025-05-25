@@ -1,3 +1,4 @@
+import { debugLog } from '@/lib/logger';
 
 import { supabase } from '@/lib/supabase-client';
 
@@ -152,7 +153,7 @@ export class PaymentLogger {
         console.warn(`${prefix} ${logEntry.message}`, logEntry.data || '');
         break;
       case 'success':
-        console.log(`%c${prefix} ${logEntry.message}`, 'color: green', logEntry.data || '');
+        debugLog(`%c${prefix} ${logEntry.message}`, 'color: green', logEntry.data || '');
         break;
       case 'info':
         console.info(`${prefix} ${logEntry.message}`, logEntry.data || '');

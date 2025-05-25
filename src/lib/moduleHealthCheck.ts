@@ -1,3 +1,4 @@
+import { debugLog } from '@/lib/logger';
 
 /**
  * Module health check utility for monitoring and diagnosing module loading issues
@@ -67,7 +68,7 @@ class ModuleHealthMonitor {
    * Check all registered modules
    */
   private async checkAllModules(): Promise<void> {
-    console.log('Running module health check...');
+    debugLog('Running module health check...');
     
     for (const moduleKey of Object.keys(this.moduleStatus)) {
       const module = this.moduleStatus[moduleKey];
@@ -75,7 +76,7 @@ class ModuleHealthMonitor {
     }
     
     // Log overall health status
-    console.log('Module health check complete:', 
+    debugLog('Module health check complete:', 
       Object.values(this.moduleStatus).map(m => `${m.name}: ${m.status}`));
   }
   
@@ -121,7 +122,7 @@ class ModuleHealthMonitor {
     
     // Try to recover via service worker if available
     if ('serviceWorker' in navigator && navigator.serviceWorker.controller) {
-      console.log(`Requesting service worker to refetch ${module.name}`);
+      debugLog(`Requesting service worker to refetch ${module.name}`);
       navigator.serviceWorker.controller.postMessage({
         type: 'RETRY_FAILED_MODULES',
         modules: [module.path]

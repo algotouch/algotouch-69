@@ -1,3 +1,4 @@
+import { debugLog } from '../_shared/logger.ts';
 
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.14.0";
@@ -34,8 +35,8 @@ serve(async (req) => {
     // Parse request body
     const { paymentData, userId, source } = await req.json();
     
-    console.log(`Processing payment data from ${source} for user: ${userId}`);
-    console.log('Payment data:', JSON.stringify(paymentData));
+    debugLog(`Processing payment data from ${source} for user: ${userId}`);
+    debugLog('Payment data:', JSON.stringify(paymentData));
 
     // Extract token information if available
     const tokenInfo = paymentData.TokenInfo;
@@ -80,7 +81,7 @@ serve(async (req) => {
 
     // 2. If we have token info, store it in payment_tokens table
     if (tokenInfo && tokenInfo.Token) {
-      console.log(`Storing token for user: ${userId}, token: ${tokenInfo.Token}`);
+      debugLog(`Storing token for user: ${userId}, token: ${tokenInfo.Token}`);
 
       try {
         // Deactivate previous tokens for this user
@@ -107,7 +108,7 @@ serve(async (req) => {
           console.error('Error storing token:', tokenError);
           throw new Error(`Failed to store token: ${tokenError.message}`);
         } else {
-          console.log('Token stored successfully');
+          debugLog('Token stored successfully');
         }
       } catch (tokenSaveError) {
         console.error('Error in token storage:', tokenSaveError);

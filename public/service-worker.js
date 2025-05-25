@@ -1,7 +1,7 @@
 
 // Enhanced service worker for caching and error recovery
-
-// Cache name with version - increment this to force cache busting
+const DEBUG = self.location.hostname === 'localhost';
+function debugLog(...args) { if (DEBUG) console.log(...args); }
 const CACHE_NAME = 'algotouch-cache-v5';
 
 // Critical files to cache - prioritize Auth and Dashboard components
@@ -17,13 +17,13 @@ const urlsToCache = [
 
 // Install the service worker and cache initial assets
 self.addEventListener('install', (event) => {
-  console.log('Service Worker installing...');
+  debugLog('Service Worker installing...');
   // Force activation without waiting
   self.skipWaiting();
   
   event.waitUntil(
     caches.open(CACHE_NAME).then((cache) => {
-      console.log('Caching app shell and content');
+      debugLog('Caching app shell and content');
       return cache.addAll(urlsToCache);
     })
   );
@@ -31,7 +31,7 @@ self.addEventListener('install', (event) => {
 
 // Activate the service worker and clean up old caches
 self.addEventListener('activate', (event) => {
-  console.log('Service Worker activating...');
+  debugLog('Service Worker activating...');
   // Take control immediately
   event.waitUntil(clients.claim());
   
@@ -40,7 +40,7 @@ self.addEventListener('activate', (event) => {
       return Promise.all(
         cacheNames.map((cacheName) => {
           if (cacheName !== CACHE_NAME) {
-            console.log('Service Worker: clearing old cache:', cacheName);
+            debugLog('Service Worker: clearing old cache:', cacheName);
             return caches.delete(cacheName);
           }
         })
@@ -99,7 +99,7 @@ self.addEventListener('fetch', (event) => {
           return response;
         })
         .catch(() => {
-          console.log('Service Worker: Falling back to cache for:', originalUrl);
+          debugLog('Service Worker: Falling back to cache for:', originalUrl);
           // If network fetch fails, try to get from cache
           return caches.match(event.request).then(cachedResponse => {
             if (cachedResponse) {
@@ -171,13 +171,13 @@ self.addEventListener('message', (event) => {
   }
   
   if (event.data && event.data.type === 'RETRY_FAILED_MODULES') {
-    console.log('Service Worker: Attempting to recover failed modules', event.data.modules);
+    debugLog('Service Worker: Attempting to recover failed modules', event.data.modules);
     const moduleUrls = event.data.modules || [];
     
     // Invalidate cache for these modules
     caches.open(CACHE_NAME).then((cache) => {
       moduleUrls.forEach(url => {
-        cache.delete(url).then(() => console.log('Cache invalidated for:', url));
+        cache.delete(url).then(() => debugLog('Cache invalidated for:', url));
       });
       
       // Fetch fresh copies
@@ -190,14 +190,14 @@ self.addEventListener('message', (event) => {
             .then(response => {
               if (response.ok) {
                 cache.put(url, response);
-                console.log('Module recovered successfully:', url);
+                debugLog('Module recovered successfully:', url);
                 return true;
               }
-              console.log('Module recovery failed:', url);
+              debugLog('Module recovery failed:', url);
               return false;
             })
             .catch(() => {
-              console.log('Module fetch failed completely:', url);
+              debugLog('Module fetch failed completely:', url);
               return false;
             })
         )
@@ -214,7 +214,7 @@ self.addEventListener('message', (event) => {
   }
   
   if (event.data && event.data.type === 'CHECK_UPDATES') {
-    console.log('Checking for updates to cached resources');
+    debugLog('Checking for updates to cached resources');
     updateCachedResources();
   }
 });
@@ -241,7 +241,7 @@ async function preloadCriticalAssets() {
         
         if (response.ok) {
           await cache.put(asset, response);
-          console.log('Successfully preloaded:', asset);
+          debugLog('Successfully preloaded:', asset);
         }
       } catch (err) {
         console.warn('Failed to preload asset:', asset, err);
@@ -270,7 +270,7 @@ async function updateCachedResources() {
         
         if (freshResponse.ok) {
           await cache.put(request, freshResponse);
-          console.log('Updated cached resource:', request.url);
+          debugLog('Updated cached resource:', request.url);
         }
       } catch (err) {
         console.warn('Failed to update cached resource:', request.url, err);

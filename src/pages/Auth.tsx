@@ -1,3 +1,4 @@
+import { debugLog } from '@/lib/logger';
 
 import React, { useEffect } from 'react';
 import { Navigate, useLocation, useNavigate } from 'react-router-dom';
@@ -72,7 +73,7 @@ const Auth = () => {
       const oneHourMs = 60 * 60 * 1000;
       
       if (now - registrationTime > oneHourMs) {
-        console.log('Auth: Registration data is stale (>1 hour), clearing');
+        debugLog('Auth: Registration data is stale (>1 hour), clearing');
         clearRegistrationData();
         toast.info('מידע ההרשמה הישן נמחק. אנא התחל מחדש');
       }
@@ -90,7 +91,7 @@ const Auth = () => {
 
   // If user is already authenticated, redirect to dashboard or subscription
   if (isAuthenticated) {
-    console.log("Auth page: User is authenticated, redirecting to appropriate page");
+    debugLog("Auth page: User is authenticated, redirecting to appropriate page");
     if (state?.redirectToSubscription || pendingSubscription) {
       return <Navigate to="/subscription" replace />;
     }

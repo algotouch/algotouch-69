@@ -1,3 +1,4 @@
+import { debugLog } from '../_shared/logger.ts';
 
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.14.0";
@@ -91,7 +92,7 @@ serve(async (req) => {
     const redirectUrl = `${origin}/payment-redirect.html`;
     
     // Log the configuration
-    console.log(`Creating CardCom payment session with terminal: ${terminalNumber}, operation: ${operationString}, amount: ${amount}`);
+    debugLog(`Creating CardCom payment session with terminal: ${terminalNumber}, operation: ${operationString}, amount: ${amount}`);
 
     // Extract user details for pre-filling the form
     const cardOwnerName = userDetails?.fullName || '';
@@ -132,7 +133,7 @@ serve(async (req) => {
       UIDefinition: enhancedUiDefinition
     };
 
-    console.log('Sending payload with user details:', {
+    debugLog('Sending payload with user details:', {
       name: enhancedUiDefinition.CardOwnerNameValue,
       email: enhancedUiDefinition.CardOwnerEmailValue,
       phone: enhancedUiDefinition.CardOwnerPhoneValue,
@@ -163,7 +164,7 @@ serve(async (req) => {
       throw new Error(`CardCom error: ${result.Description || 'Unknown error'}`);
     }
 
-    console.log(`Created CardCom payment session: ${result.LowProfileId}`);
+    debugLog(`Created CardCom payment session: ${result.LowProfileId}`);
 
     // Save the payment session to database for tracking
     try {

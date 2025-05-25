@@ -1,3 +1,4 @@
+import { debugLog } from '@/lib/logger';
 
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/contexts/auth';
@@ -38,7 +39,7 @@ export const useUnifiedRegistrationData = () => {
       try {
         // First try to load from auth context
         if (contextRegistrationData) {
-          console.log("Loading registration data from context:", {
+          debugLog("Loading registration data from context:", {
             email: contextRegistrationData.email,
             hasUserData: !!contextRegistrationData.userData,
             planId: contextRegistrationData.planId
@@ -77,14 +78,14 @@ export const useUnifiedRegistrationData = () => {
             
             // If data is too old, ignore it
             if (!registrationTime || !isValid) {
-              console.log('Registration data has expired, clearing session');
+              debugLog('Registration data has expired, clearing session');
               sessionStorage.removeItem('registration_data');
               setDataSource('none');
               setIsLoading(false);
               return;
             }
             
-            console.log('Registration data found in session:', { 
+            debugLog('Registration data found in session:', { 
               email: data.email, 
               firstName: data.userData?.firstName,
               registrationTime: data.registrationTime,
@@ -120,7 +121,7 @@ export const useUnifiedRegistrationData = () => {
             setDataSource('none');
           }
         } else {
-          console.log("No registration data found");
+          debugLog("No registration data found");
           setDataSource('none');
         }
       } catch (error) {
@@ -170,7 +171,7 @@ export const useUnifiedRegistrationData = () => {
         setSelectedPlan(newData.planId);
       }
       
-      console.log("Updated registration data:", {
+      debugLog("Updated registration data:", {
         email: updatedData.email,
         plan: updatedData.planId,
         step: updatedData.contractSigned ? "contract signed" : updatedData.planId ? "plan selected" : "initial",
@@ -218,7 +219,7 @@ export const useUnifiedRegistrationData = () => {
         clearContextRegistrationData();
       }
       
-      console.log("Cleared all registration data");
+      debugLog("Cleared all registration data");
       setDataSource('none');
       
       return true;

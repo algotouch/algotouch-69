@@ -1,3 +1,4 @@
+import { debugLog } from '../_shared/logger.ts';
 
 /**
  * Email service for document generation
@@ -15,7 +16,7 @@ export async function sendDocumentEmail(
 ): Promise<{ success: boolean; error?: any }> {
   try {
     // In a real implementation, we would call an email service or Edge Function
-    console.log('Sending document email to:', {
+    debugLog('Sending document email to:', {
       email,
       fullName,
       documentType,
@@ -52,7 +53,7 @@ export async function sendContractConfirmationEmail(
   contractSignedAt: string
 ): Promise<{ success: boolean; error?: any }> {
   try {
-    console.log('Sending contract confirmation email to:', {
+    debugLog('Sending contract confirmation email to:', {
       email,
       fullName,
       contractSignedAt

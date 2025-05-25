@@ -1,3 +1,4 @@
+import { debugLog } from '@/lib/logger';
 
 import { toast } from 'sonner';
 import { saveContractToDatabase, updateSubscriptionStatus, callIzidocSignFunction } from './storage-service';
@@ -14,7 +15,7 @@ export async function processSignedContract(
   contractData: any
 ): Promise<string | boolean> {
   try {
-    console.log('Processing signed contract for user:', { userId, planId, email });
+    debugLog('Processing signed contract for user:', { userId, planId, email });
     
     // Improved validation of inputs
     if (!userId || !planId || !email || !contractData) {
@@ -29,7 +30,7 @@ export async function processSignedContract(
     }
     
     // First try to use the edge function for processing
-    console.log('Attempting to use izidoc-sign edge function');
+    debugLog('Attempting to use izidoc-sign edge function');
     try {
       const { success, data, error } = await callIzidocSignFunction(
         userId, 
@@ -40,20 +41,20 @@ export async function processSignedContract(
       );
       
       if (success) {
-        console.log('Contract processed successfully by edge function:', data);
+        debugLog('Contract processed successfully by edge function:', data);
         toast.success('ההסכם נחתם ונשמר בהצלחה!');
         return data.documentId || true;
       } else {
         console.error('Edge function error:', error);
-        console.log('Falling back to client-side processing');
+        debugLog('Falling back to client-side processing');
       }
     } catch (edgeFunctionError) {
       console.error('Edge function call failed:', edgeFunctionError);
-      console.log('Falling back to client-side processing');
+      debugLog('Falling back to client-side processing');
     }
     
     // Fallback to client-side processing
-    console.log('Using client-side fallback for contract processing');
+    debugLog('Using client-side fallback for contract processing');
     const saveResult = await saveContractToDatabase(userId, planId, fullName, email, contractData);
     
     if (!saveResult.success) {
@@ -64,7 +65,7 @@ export async function processSignedContract(
     
     // Return the contract ID for potential redirects to view the contract
     const contractId = saveResult.data?.id;
-    console.log('Contract saved with ID:', contractId);
+    debugLog('Contract saved with ID:', contractId);
     
     // Try to update the subscription status
     await updateSubscriptionStatus(userId);
@@ -85,7 +86,7 @@ export async function uploadContractToStorage(
   contractId: string
 ): Promise<{ success: boolean; url?: string; error?: any }> {
   try {
-    console.log(`Uploading contract HTML to storage for user: ${userId}, contract: ${contractId}`);
+    debugLog(`Uploading contract HTML to storage for user: ${userId}, contract: ${contractId}`);
     
     // Generate a file name based on contract ID
     const fileName = `${userId}/${contractId}.html`;
@@ -104,7 +105,7 @@ export async function uploadContractToStorage(
       return { success: false, error };
     }
     
-    console.log('Contract uploaded successfully to storage:', data?.path);
+    debugLog('Contract uploaded successfully to storage:', data?.path);
     
     // Create a URL for accessing the contract
     const { data: urlData } = await supabase

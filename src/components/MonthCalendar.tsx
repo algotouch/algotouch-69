@@ -1,3 +1,4 @@
+import { debugLog } from '@/lib/logger';
 
 import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
@@ -72,14 +73,14 @@ const MonthCalendar = ({
   
   const { totalTrades, totalProfit } = calculateMonthlyStats();
   
-  console.log(`MonthCalendar: For ${month} ${year} - monthIndex=${monthIndex}, found ${totalTrades} trades with profit ${totalProfit}`);
+  debugLog(`MonthCalendar: For ${month} ${year} - monthIndex=${monthIndex}, found ${totalTrades} trades with profit ${totalProfit}`);
   
   // Handle day click
   const handleDayClick = (day: number, month: 'current' | 'prev' | 'next') => {
     if (month === 'current') {
       // Create key in the new format
       const dayKey = `${day}-${monthIndex}-${year}`;
-      console.log("Day clicked:", dayKey, "Has trades:", tradesData[dayKey]?.length || 0);
+      debugLog("Day clicked:", dayKey, "Has trades:", tradesData[dayKey]?.length || 0);
       
       setSelectedDay(dayKey);
       if (onDayClick) onDayClick(day);
@@ -94,7 +95,7 @@ const MonthCalendar = ({
         status={status}
         tradesCount={totalTrades}
         totalProfit={totalProfit}
-        onAddTrade={() => console.log('Add trade clicked')}
+        onAddTrade={() => debugLog('Add trade clicked')}
       />
       
       <div className="p-4">

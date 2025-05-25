@@ -1,3 +1,4 @@
+import { debugLog } from '@/lib/logger';
 
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
@@ -32,10 +33,10 @@ const LoginForm: React.FC<LoginFormProps> = ({ onLoginSuccess }) => {
     
     try {
       setLoggingIn(true);
-      console.log('Attempting sign in with:', email);
+      debugLog('Attempting sign in with:', email);
       await signIn(email, password);
       
-      console.log('Login successful, redirectToSubscription:', state?.redirectToSubscription);
+      debugLog('Login successful, redirectToSubscription:', state?.redirectToSubscription);
       
       // Handle navigation after successful login
       setTimeout(() => {
@@ -73,12 +74,12 @@ const LoginForm: React.FC<LoginFormProps> = ({ onLoginSuccess }) => {
     
     try {
       setResettingPassword(true);
-      console.log('Requesting password reset for:', email);
+      debugLog('Requesting password reset for:', email);
       
       // Use the AuthContext resetPassword method
       await resetPassword(email);
       
-      console.log('Password reset email sent successfully');
+      debugLog('Password reset email sent successfully');
       toast.success('הוראות לאיפוס הסיסמה נשלחו לדוא"ל שלך');
     } catch (error: any) {
       console.error('Password reset error:', error);

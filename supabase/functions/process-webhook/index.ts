@@ -1,3 +1,4 @@
+import { debugLog } from '../_shared/logger.ts';
 
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.14.0";
@@ -48,7 +49,7 @@ serve(async (req) => {
     }
 
     // For debugging
-    console.log(`Process webhook request: webhookId=${webhookId}, userId=${userId}, lowProfileId=${lowProfileId}, email=${email}`);
+    debugLog(`Process webhook request: webhookId=${webhookId}, userId=${userId}, lowProfileId=${lowProfileId}, email=${email}`);
 
     // If email is provided but no userId, try to find userId
     let effectiveUserId = userId;
@@ -61,7 +62,7 @@ serve(async (req) => {
         
         if (authUser?.users && authUser.users.length > 0) {
           effectiveUserId = authUser.users[0].id;
-          console.log(`Found userId ${effectiveUserId} for email ${email}`);
+          debugLog(`Found userId ${effectiveUserId} for email ${email}`);
         }
       } catch (e) {
         console.error("Error finding user by email:", e);
@@ -70,7 +71,7 @@ serve(async (req) => {
 
     // Scenario 1: Process a specific webhook by ID
     if (webhookId) {
-      console.log(`Processing webhook by ID: ${webhookId}`);
+      debugLog(`Processing webhook by ID: ${webhookId}`);
       
       // Get the webhook data
       const { data: webhookData, error: webhookError } = await supabaseClient
@@ -98,7 +99,7 @@ serve(async (req) => {
       
       // If userId is provided, update ReturnValue in payload
       if (effectiveUserId && payload) {
-        console.log(`Updating ReturnValue to ${effectiveUserId} in webhook payload`);
+        debugLog(`Updating ReturnValue to ${effectiveUserId} in webhook payload`);
         payload.ReturnValue = effectiveUserId;
       }
       
@@ -148,7 +149,7 @@ serve(async (req) => {
     
     // Scenario 2: Process by lowProfileId
     if (lowProfileId) {
-      console.log(`Processing by lowProfileId: ${lowProfileId}`);
+      debugLog(`Processing by lowProfileId: ${lowProfileId}`);
       
       // Look up the webhook by LowProfileId
       const { data: webhookData, error: webhookError } = await supabaseClient
@@ -177,7 +178,7 @@ serve(async (req) => {
           );
         }
         
-        console.log(`Calling CardCom API for lowProfileId ${lowProfileId}`);
+        debugLog(`Calling CardCom API for lowProfileId ${lowProfileId}`);
         
         // Call CardCom API directly
         const cardcomResponse = await fetch('https://secure.cardcom.solutions/api/v1/LowProfile/GetLpResult', {
@@ -207,7 +208,7 @@ serve(async (req) => {
         }
         
         const cardcomData = await cardcomResponse.json();
-        console.log(`CardCom API response:`, cardcomData);
+        debugLog(`CardCom API response:`, cardcomData);
         
         if (cardcomData.ResponseCode !== 0) {
           return new Response(
@@ -379,7 +380,7 @@ serve(async (req) => {
       
       // If userId is provided and different from ReturnValue, update the payload
       if (effectiveUserId && payload && effectiveUserId !== payload.ReturnValue) {
-        console.log(`Updating ReturnValue from ${payload.ReturnValue} to ${effectiveUserId}`);
+        debugLog(`Updating ReturnValue from ${payload.ReturnValue} to ${effectiveUserId}`);
         payload.ReturnValue = effectiveUserId;
       }
       
@@ -429,7 +430,7 @@ serve(async (req) => {
 
     // Scenario 3: Process by email
     if (email) {
-      console.log(`Processing by email: ${email}`);
+      debugLog(`Processing by email: ${email}`);
       
       // First try to find a webhook with this email
       const { data: webhooks, error: webhookError } = await supabaseClient
@@ -469,13 +470,13 @@ serve(async (req) => {
       
       // Process the first webhook
       const webhook = webhooks[0];
-      console.log(`Processing webhook ${webhook.id} for email ${email}`);
+      debugLog(`Processing webhook ${webhook.id} for email ${email}`);
       
       const payload = webhook.payload;
       
       // Update ReturnValue with our userId if we have one
       if (effectiveUserId && payload) {
-        console.log(`Setting ReturnValue to ${effectiveUserId}`);
+        debugLog(`Setting ReturnValue to ${effectiveUserId}`);
         payload.ReturnValue = effectiveUserId;
       }
       

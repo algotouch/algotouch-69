@@ -1,3 +1,4 @@
+import { debugLog } from '@/lib/logger';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 
@@ -30,7 +31,7 @@ export async function sendEmail(emailRequest: EmailRequest): Promise<{ success: 
       return { success: false, error: errorMsg };
     }
     
-    console.log('Sending email via SMTP:', {
+    debugLog('Sending email via SMTP:', {
       to: emailRequest.to,
       subject: emailRequest.subject,
       hasAttachments: emailRequest.attachmentData && emailRequest.attachmentData.length > 0
@@ -46,7 +47,7 @@ export async function sendEmail(emailRequest: EmailRequest): Promise<{ success: 
       return { success: false, error: error.message || JSON.stringify(error) };
     }
 
-    console.log('Email sent successfully:', data);
+    debugLog('Email sent successfully:', data);
     return { success: true, messageId: data?.messageId || 'sent' };
   } catch (error: any) {
     console.error('Exception sending email:', error);
@@ -58,7 +59,7 @@ export async function sendEmail(emailRequest: EmailRequest): Promise<{ success: 
  * Sends a welcome email to a newly registered user
  */
 export async function sendWelcomeEmail(userEmail: string, userName: string): Promise<{ success: boolean }> {
-  console.log('Sending welcome email to:', userEmail);
+  debugLog('Sending welcome email to:', userEmail);
   
   try {
     const result = await sendEmail({
@@ -104,7 +105,7 @@ export async function sendWelcomeEmail(userEmail: string, userName: string): Pro
  * Sends a verification email for account confirmation
  */
 export async function sendVerificationEmail(userEmail: string, verificationLink: string): Promise<{ success: boolean }> {
-  console.log('Sending verification email to:', userEmail);
+  debugLog('Sending verification email to:', userEmail);
   
   return sendEmail({
     to: userEmail,
@@ -137,7 +138,7 @@ export async function sendVerificationEmail(userEmail: string, verificationLink:
  * Sends a password reset email
  */
 export async function sendPasswordResetEmail(userEmail: string, resetLink: string): Promise<{ success: boolean }> {
-  console.log('Sending password reset email to:', userEmail);
+  debugLog('Sending password reset email to:', userEmail);
   
   return sendEmail({
     to: userEmail,

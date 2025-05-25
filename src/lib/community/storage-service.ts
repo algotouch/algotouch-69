@@ -1,3 +1,4 @@
+import { debugLog } from '@/lib/logger';
 
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
@@ -13,7 +14,7 @@ export async function ensureCommunityMediaBucketExists(): Promise<boolean> {
     
     if (getBucketError) {
       if (getBucketError.message.includes('The bucket does not exist')) {
-        console.log('Bucket does not exist, attempting to create it...');
+        debugLog('Bucket does not exist, attempting to create it...');
         // Create the bucket if it doesn't exist
         const { error: createBucketError } = await supabase.storage
           .createBucket('community_media', {
@@ -38,7 +39,7 @@ export async function ensureCommunityMediaBucketExists(): Promise<boolean> {
           return false;
         }
         
-        console.log('Created community media bucket successfully');
+        debugLog('Created community media bucket successfully');
         return true;
       } else {
         console.error('Error checking community media bucket:', getBucketError);
@@ -46,7 +47,7 @@ export async function ensureCommunityMediaBucketExists(): Promise<boolean> {
       }
     }
     
-    console.log('Community media bucket exists:', bucket);
+    debugLog('Community media bucket exists:', bucket);
     return true;
   } catch (error) {
     console.error('Exception in ensureCommunityMediaBucketExists:', error);
@@ -59,7 +60,7 @@ export async function ensureCommunityMediaBucketExists(): Promise<boolean> {
  */
 export async function initCommunityStorage(): Promise<void> {
   try {
-    console.log('Initializing community storage...');
+    debugLog('Initializing community storage...');
     
     // Instead of immediately showing an error toast, check if we're on a page that needs storage
     // This way, we can avoid showing errors on pages that don't need the storage bucket
@@ -78,7 +79,7 @@ export async function initCommunityStorage(): Promise<void> {
         });
       }
     } else {
-      console.log('Community storage initialized successfully');
+      debugLog('Community storage initialized successfully');
     }
   } catch (error) {
     console.error('Error initializing community storage:', error);
