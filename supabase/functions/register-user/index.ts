@@ -104,9 +104,7 @@ serve(async (req) => {
     })
     .select('id')
     .single();
-
   console.log('Subscription created successfully', subscriptionData.id);
-
   await supabaseClient.from('payment_history').insert({
     user_id: userData.user.id,
     subscription_id: subscriptionData.id,
@@ -119,17 +117,6 @@ serve(async (req) => {
       console.error('Subscription error:', subscriptionError);
       throw subscriptionError;
     }
-
-    console.log('Subscription created successfully', subscriptionData.id);
-
-      // Create payment history record using the actual subscription id
-      await supabaseClient.from('payment_history').insert({
-        user_id: userData.user.id,
-        subscription_id: subscriptionData.id,
-        amount: 0,
-        status: 'trial_started',
-        payment_method: paymentMethod
-      });
 
     // Update profile information
     const { error: profileError } = await supabaseClient
