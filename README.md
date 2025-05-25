@@ -60,6 +60,20 @@ This project is built with .
 - shadcn-ui
 - Tailwind CSS
 
+## Required Environment Variables
+
+Supabase Edge Functions rely on several environment variables. Ensure these are set before deploying:
+
+- `SUPABASE_URL` – your Supabase project URL
+- `SUPABASE_ANON_KEY` – anonymous key for public calls
+- `SUPABASE_SERVICE_ROLE_KEY` – service role key for privileged operations
+- `CARDCOM_TERMINAL` – CardCom terminal number
+- `CARDCOM_USERNAME` – CardCom API username
+- `CARDCOM_API_PASSWORD` – CardCom API password
+- `OPENAI_API_KEY` – API key for AI functions
+- `GMAIL_CLIENT_ID`, `GMAIL_CLIENT_SECRET`, `GMAIL_REFRESH_TOKEN` – credentials for Gmail sender
+- `SMTP_HOST`, `SMTP_PORT`, `SMTP_USER`, `SMTP_PASS` – SMTP credentials for the mailer
+
 ## How can I deploy this project?
 
 Simply open [Lovable](https://lovable.dev/projects/943ea41c-32cf-4f38-9bf8-8a57a35db025) and click on Share -> Publish.

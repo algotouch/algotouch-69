@@ -1,6 +1,9 @@
 
 // Follow Deno's HTTP server implementation
 import { corsHeaders } from '../_shared/cors.ts';
+import { envCheck } from '../_shared/envCheck.ts';
+
+envCheck([]);
 
 // Define the stock data interface
 interface StockData {

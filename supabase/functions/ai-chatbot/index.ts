@@ -2,6 +2,9 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
 import "https://deno.land/x/xhr@0.1.0/mod.ts"
 import OpenAI from "https://esm.sh/openai@4.20.1"
+import { envCheck } from "../_shared/envCheck.ts"
+
+envCheck(["OPENAI_API_KEY"])
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
