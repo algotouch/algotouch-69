@@ -70,16 +70,15 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   // Validate session with the server
   const validateSession = async () => {
     if (!auth.session) return false;
-    
+
     try {
-      // Use the imported supabase client directly
-      const { data, error } = await supabase.auth.getUser();
+      const { data, error } = await supabase.functions.invoke('validate-session');
       if (error) {
         console.error('Session validation error:', error);
         return false;
       }
-      
-      return !!data.user;
+
+      return Boolean(data?.valid);
     } catch (error) {
       console.error('Session validation exception:', error);
       return false;
@@ -106,6 +105,18 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       clearTimeout(timeoutId);
     };
   }, [auth.initialized, isInitializing]);
+
+  // Validate the current session once auth is initialized
+  useEffect(() => {
+    if (!auth.initialized || !auth.session) return;
+
+    validateSession().then((valid) => {
+      if (!valid) {
+        auth.signOut();
+        clearRegistrationData();
+      }
+    });
+  }, [auth.initialized, auth.session]);
   
   // If there's an auth error, redirect to the error page
   useEffect(() => {
