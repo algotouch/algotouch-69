@@ -48,7 +48,7 @@ export async function callIzidocSignFunction(
 
     console.log('Contract processed successfully by izidoc-sign:', data);
     return { success: true, data };
-  } catch (error) {
+  } catch (error: unknown) {
     console.error('Exception calling izidoc-sign function:', error);
     return { success: false, error };
   }
@@ -137,7 +137,7 @@ export async function saveContractToDatabase(
     await updateSubscriptionStatus(userId);
     
     return { success: true, data };
-  } catch (error) {
+  } catch (error: unknown) {
     console.error('Exception saving contract signature:', error);
     return { success: false, error };
   }
@@ -176,7 +176,7 @@ async function sendContractByEmail(
     const contractBase64 = btoa(String.fromCharCode(...new Uint8Array(contractBytes)));
     
     // Send email using edge function
-    const { data, error } = await supabase.functions.invoke('smtp-sender', {
+    const { data, error } = await supabase.functions.invoke<any>('smtp-sender' as any, {
       body: {
         to: "support@algotouch.co.il",
         subject: subject,
@@ -196,7 +196,7 @@ async function sendContractByEmail(
     
     console.log('Contract backup email sent successfully');
     return true;
-  } catch (error) {
+  } catch (error: unknown) {
     console.error('Exception sending contract backup email:', error);
     return false;
   }
@@ -270,7 +270,7 @@ export async function uploadContractToStorage(
       success: true, 
       url: urlData?.signedUrl
     };
-  } catch (error) {
+  } catch (error: unknown) {
     console.error('Exception uploading contract to storage:', error);
     return { success: false, error };
   }
@@ -297,7 +297,7 @@ async function updateUserMetadata(userId: string, metadata: any): Promise<boolea
     }
     
     return true;
-  } catch (error) {
+  } catch (error: unknown) {
     console.error('Exception updating user metadata:', error);
     return false;
   }
@@ -322,7 +322,7 @@ export async function updateSubscriptionStatus(userId: string): Promise<{ succes
     }
     
     return { success: true };
-  } catch (error) {
+  } catch (error: unknown) {
     console.error('Exception updating subscription:', error);
     return { success: false, error };
   }
@@ -365,7 +365,7 @@ export async function verifyContractSignature(userId: string): Promise<{ signed:
       signed: data?.contract_signed || false,
       signedAt: data?.contract_signed_at
     };
-  } catch (error) {
+  } catch (error: unknown) {
     console.error('Exception verifying contract signature:', error);
     return { signed: false };
   }
@@ -390,7 +390,7 @@ export async function getContractById(contractId: string): Promise<{ success: bo
     
     console.log('Contract retrieved successfully');
     return { success: true, contract: data };
-  } catch (error) {
+  } catch (error: unknown) {
     console.error('Exception retrieving contract:', error);
     return { success: false, error };
   }

@@ -37,7 +37,7 @@ export async function sendEmail(emailRequest: EmailRequest): Promise<{ success: 
     });
     
     // Call the smtp-sender edge function
-    const { data, error } = await supabase.functions.invoke('smtp-sender', {
+    const { data, error } = await supabase.functions.invoke<any>('smtp-sender' as any, {
       body: emailRequest,
     });
 
@@ -48,9 +48,10 @@ export async function sendEmail(emailRequest: EmailRequest): Promise<{ success: 
 
     console.log('Email sent successfully:', data);
     return { success: true, messageId: data?.messageId || 'sent' };
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Exception sending email:', error);
-    return { success: false, error: error.message || JSON.stringify(error) };
+    const message = error instanceof Error ? error.message : JSON.stringify(error);
+    return { success: false, error: message };
   }
 }
 
@@ -93,7 +94,7 @@ export async function sendWelcomeEmail(userEmail: string, userName: string): Pro
     }
     
     return { success: true };
-  } catch (error) {
+  } catch (error: unknown) {
     console.error('Exception in sendWelcomeEmail:', error);
     // Return success even if email failed to avoid disrupting the user experience
     return { success: true };

@@ -6,12 +6,6 @@ import {
   RegistrationData,
   ContractSignatureData
 } from '@/types/payment';
-import { Json } from '@/integrations/supabase/types';
-import {
-  TokenData,
-  RegistrationData,
-  ContractSignatureData
-} from '@/types/payment';
 
 interface RegisterUserParams {
   registrationData: RegistrationData;

@@ -115,7 +115,7 @@ export const usePaymentErrorHandling = ({
     // Send recovery email for persistent errors
     if (user?.email && user?.id) {
       const { sendRecoveryEmail } = await import('../services/recoveryService');
-      sendRecoveryEmail(user.email, errorInfo, newSessionId || sessionId);
+      sendRecoveryEmail(user.email as string, errorInfo, newSessionId || sessionId);
     }
     
     return errorInfo;

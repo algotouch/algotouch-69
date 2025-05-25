@@ -8,7 +8,7 @@ export function generateCalendarDays(
   month: string,
   year: number,
   tradesData: Record<string, TradeRecord[]>
-) {
+): Array<{ day: number; month: string; isToday?: boolean; status?: string }> {
   // Hebrew month names
   const hebrewMonths = [
     'ינואר', 'פברואר', 'מרץ', 'אפריל', 'מאי', 'יוני',
@@ -40,7 +40,7 @@ export function generateCalendarDays(
   const daysInPrevMonth = prevMonth.getDate();
   
   // Calendar Array (6 weeks x 7 days)
-  const calendar = [];
+  const calendar: Array<{ day: number; month: string; isToday?: boolean; status?: string }> = [];
   
   // Add previous month days
   for (let i = 0; i < firstDayOfWeek; i++) {
