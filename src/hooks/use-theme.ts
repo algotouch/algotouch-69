@@ -1,26 +1,18 @@
+import { useContext } from 'react'
+import { ThemeContext, Theme } from '@/contexts/theme'
 
-import { useTheme as useNextThemes } from 'next-themes';
-
-// Export the hook with the same interface as our previous custom hook
 export const useTheme = () => {
-  // Use try-catch to handle potential initialization issues
-  try {
-    const { theme, setTheme, resolvedTheme } = useNextThemes();
-    
-    return { 
-      theme, 
-      setTheme,
-      resolvedTheme 
-    };
-  } catch (error) {
-    // Fallback if next-themes isn't initialized yet
-    console.error('Theme hook error:', error);
+  const ctx = useContext(ThemeContext)
+  if (!ctx) {
+    console.warn('useTheme must be used within ThemeProvider')
     return {
-      theme: 'dark',
-      setTheme: () => console.warn('Theme provider not ready'),
-      resolvedTheme: 'dark'
-    };
+      theme: 'dark' as Theme,
+      setTheme: () => {
+        /* noop */
+      }
+    }
   }
-};
+  return ctx
+}
 
-export default useTheme;
+export default useTheme
