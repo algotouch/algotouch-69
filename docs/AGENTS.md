@@ -13,6 +13,7 @@ Project guides, standards, and deep-dives in `/docs`.
 - Document decisions, rationales, gotchas
 - New docs: create descriptive filenames (e.g. `PERFORMANCE.md`, `REACT_PROFILING.md`)
 - Cross-link AGENTS.md, CODE_STANDARDS.md, etc., where helpful
+- See `UPTIME_MONITORING.md` for health check setup
 
 ---
 
