@@ -74,6 +74,9 @@ export function useSecureAuth() {
         return { success: false, error: signInError };
       }
 
+      setSession(data.session);
+      setUser(data.user);
+
       return { success: true };
     } catch (err) {
       console.error('Sign in error:', err);
