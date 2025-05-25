@@ -6,13 +6,22 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import { Check, FileText, Download, ArrowDown } from 'lucide-react';
-import { supabase } from '@/integrations/supabase/client';
+import { RegistrationData, ContractSignatureData } from '@/types/payment';
 import SignaturePad from './signature/SignaturePad';
 import { useToast } from '@/components/ui/use-toast';
 import { useAuth } from '@/contexts/auth';
 
+interface SignedContractData extends ContractSignatureData {
+  userId?: string;
+  fullName: string;
+  address: string;
+  idNumber: string;
+  phone: string;
+  email: string;
+}
+
 interface DigitalContractFormProps {
-  onSign: (contractData: any) => void;
+  onSign: (contractData: SignedContractData) => void;
   planId: string;
   fullName: string;
 }
@@ -35,7 +44,7 @@ const DigitalContractForm: React.FC<DigitalContractFormProps> = ({
   const [agreedToPrivacy, setAgreedToPrivacy] = useState(false);
   const [isSigningInProgress, setIsSigningInProgress] = useState(false);
   const [scrolledToBottom, setScrolledToBottom] = useState(false);
-  const [registrationData, setRegistrationData] = useState<any>(null);
+  const [registrationData, setRegistrationData] = useState<RegistrationData | null>(null);
   const [contractVersion] = useState('1.0');
   const contractRef = useRef<HTMLDivElement>(null);
   const { toast } = useToast();
@@ -45,7 +54,7 @@ const DigitalContractForm: React.FC<DigitalContractFormProps> = ({
   useEffect(() => {
     const storedData = sessionStorage.getItem('registration_data');
     if (storedData) {
-      const data = JSON.parse(storedData);
+      const data = JSON.parse(storedData) as RegistrationData;
       setRegistrationData(data);
       
       // If user data is available, populate form fields
@@ -105,32 +114,37 @@ const DigitalContractForm: React.FC<DigitalContractFormProps> = ({
       
       // Store signing information in session storage for continued registration flow
       if (registrationData) {
-        const updatedData = {
+        const updatedData: RegistrationData = {
           ...registrationData,
+          planId,
           contractSigned: true,
           contractSignedAt: new Date().toISOString(),
-          signature,
-          planId,
+          email: userDetails.email || registrationData.email,
+          contractDetails: {
+            ...(registrationData.contractDetails || {}),
+            signature,
+            contractHtml: getContractHtml(),
+            agreedToTerms,
+            agreedToPrivacy,
+            contractVersion,
+            browserInfo: getBrowserInfo()
+          },
           userData: {
             ...registrationData.userData,
-            fullName: userDetails.fullName,
-            address: userDetails.address,
-            idNumber: userDetails.idNumber,
-            phone: userDetails.phone,
-            email: userDetails.email || registrationData.email
+            phone: userDetails.phone
           }
         };
         sessionStorage.setItem('registration_data', JSON.stringify(updatedData));
       }
 
       // Prepare contract data for passing to parent component
-      const contractData = {
+      const contractData: SignedContractData = {
         userId: user?.id,
         fullName: userDetails.fullName,
         address: userDetails.address,
         idNumber: userDetails.idNumber,
         phone: userDetails.phone,
-        email: userDetails.email || user?.email,
+        email: userDetails.email || user?.email || '',
         signature,
         contractVersion,
         contractHtml: getContractHtml(),
@@ -177,7 +191,7 @@ const DigitalContractForm: React.FC<DigitalContractFormProps> = ({
     
     // Get browser info for the footer
     const browserInfo = getBrowserInfo();
-    const ipAddress = registrationData?.ipAddress || "לא זוהה";
+    const ipAddress = (registrationData as { ipAddress?: string } | null)?.ipAddress || "לא זוהה";
     const currentDate = new Date().toLocaleString('he-IL');
     
     const blob = new Blob([`
